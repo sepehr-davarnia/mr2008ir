@@ -20,7 +20,7 @@
     },
     "Profile 1": {
       "commandName": "IIS",
-      "launchUrl": "https://www.woodzilla.ir"
+      "launchUrl": "https://mr2008.ir"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",
@@ -28,7 +28,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://www.woodzilla.ir",
+      "applicationUrl": "https://mr2008.ir",
       "sslPort": 0
     }
   }
