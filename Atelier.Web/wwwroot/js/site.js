@@ -1,43 +1,26 @@
-﻿(() => {
-  const revealElements = document.querySelectorAll(".reveal");
-  if (revealElements.length === 0) {
-    return;
-  }
-
-  if (!("IntersectionObserver" in window)) {
-    revealElements.forEach((element) => element.classList.add("is-visible"));
-    return;
-  }
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
-
-  revealElements.forEach((element) => observer.observe(element));
-})();
-
 (() => {
-  const header = document.querySelector(".site-header");
-  if (!header) {
-    return;
-  }
+  const header = document.querySelector('[data-header]');
+  const nav = document.querySelector('.primary-nav');
+  const toggle = document.querySelector('.nav-toggle');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const toggleStickyState = () => {
-    if (window.scrollY > 12) {
-      header.classList.add("is-sticky");
-    } else {
-      header.classList.remove("is-sticky");
-    }
-  };
+  window.addEventListener('scroll', () => header?.classList.toggle('is-scrolled', scrollY > 12), { passive: true });
+  toggle?.addEventListener('click', () => {
+    const open = nav?.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(Boolean(open)));
+  });
 
-  toggleStickyState();
-  window.addEventListener("scroll", toggleStickyState, { passive: true });
+  if (reduced) return document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+  }), { threshold: .12, rootMargin: '0px 0px -40px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const visual = document.querySelector('[data-parallax]');
+  window.addEventListener('pointermove', event => {
+    if (!visual || innerWidth < 992) return;
+    const x = (event.clientX / innerWidth - .5) * 10;
+    const y = (event.clientY / innerHeight - .5) * 10;
+    visual.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  }, { passive: true });
 })();
