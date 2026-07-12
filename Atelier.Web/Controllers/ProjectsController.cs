@@ -77,16 +77,16 @@ public class ProjectsController : PublicControllerBase
         };
 
         var canonicalUrl = Url.Action("Index", "Projects", new { }, Request.Scheme);
-        model.MetaTitle = "پروژه های اجرایی ترمووود";
-        model.MetaDescription = "نمونه پروژه های اجرا شده در زمینه نما، کف و پرگولا با ترمووود.";
+        model.MetaTitle = "خدمات و تجربه‌های فنی پژو ۲۰۰۸ | mr2008.ir";
+        model.MetaDescription = "نمونه خدمات، بررسی‌های فنی و تجربه‌های تخصصی مرتبط با قطعات پژو ۲۰۰۸.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
         SetBreadcrumbSchema(breadcrumbs);
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
             Type = SeoPageSchemaType.Project,
-            Title = "پروژه های اجرایی ترمووود",
-            Description = "نمونه پروژه های اجرا شده در زمینه نما، کف و پرگولا با ترمووود.",
+            Title = "خدمات و تجربه‌های فنی پژو ۲۰۰۸ | mr2008.ir",
+            Description = "نمونه خدمات، بررسی‌های فنی و تجربه‌های تخصصی مرتبط با قطعات پژو ۲۰۰۸.",
             CanonicalUrl = canonicalUrl ?? string.Empty
         });
 
