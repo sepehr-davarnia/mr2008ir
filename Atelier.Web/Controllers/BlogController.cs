@@ -66,7 +66,7 @@ public class BlogController : PublicControllerBase
 
         var canonicalUrl = Url.Action("Index", "Blog", new { }, Request.Scheme);
         model.MetaTitle = "بلاگ آتلیه وود";
-        model.MetaDescription = "آخرین مقالات و نکات تخصصی درباره محصولات چوبی و ترمووود.";
+        model.MetaDescription = "راهنمای تخصصی انتخاب قطعات، نگهداری و خرید مطمئن لوازم پژو ۲۰۰۸.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
         SetBreadcrumbSchema(breadcrumbs);
@@ -74,7 +74,7 @@ public class BlogController : PublicControllerBase
         {
             Type = SeoPageSchemaType.WebPage,
             Title = "بلاگ آتلیه وود",
-            Description = "آخرین مقالات و نکات تخصصی درباره محصولات چوبی و ترمووود.",
+            Description = "راهنمای تخصصی انتخاب قطعات، نگهداری و خرید مطمئن لوازم پژو ۲۰۰۸.",
             CanonicalUrl = canonicalUrl ?? string.Empty
         });
 
