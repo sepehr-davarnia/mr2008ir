@@ -24,7 +24,7 @@
 <div class="container-xxl py-4 page-shell">
     @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
 
-    <section class="hero-card mb-4">
+    <section class="hero-card mb-4 reveal">
         <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
         @if (!string.IsNullOrWhiteSpace(Model.Content))
         {
@@ -36,7 +36,7 @@
         }
     </section>
 
-    <div class="content-card">
+    <div class="content-card reveal">
         <div class="row g-4">
             <div class="col-12 col-lg-6">
                 <div class="d-flex flex-column gap-3">
@@ -76,7 +76,7 @@
                                 }
                             </div>
                         }
-                        <button class="btn btn-dark" type="submit">ارسال پیام</button>
+                        <button class="btn btn-dark btn-submit-premium" type="submit">ارسال درخواست <span>←</span></button>
                     </div>
                 </form>
             </div>
