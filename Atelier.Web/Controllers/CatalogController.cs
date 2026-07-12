@@ -42,16 +42,16 @@ public class CatalogController : PublicControllerBase
         };
 
         var canonicalUrl = Url.Action("Index", "Catalog", new { }, Request.Scheme);
-        model.MetaTitle = "دسته بندی محصولات چوب و ترمووود";
-        model.MetaDescription = "دسته بندی های تخصصی چوب طبیعی، ترمووود و کاربردهای معماری.";
+        model.MetaTitle = "دسته‌بندی قطعات پژو ۲۰۰۸ | mr2008.ir";
+        model.MetaDescription = "خرید قطعات موتور، ترمز، تعلیق، بدنه، برق و لوازم مصرفی پژو ۲۰۰۸.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
         SetBreadcrumbSchema(breadcrumbs);
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
             Type = SeoPageSchemaType.WebPage,
-            Title = "دسته بندی محصولات چوب و ترمووود",
-            Description = "دسته بندی های تخصصی چوب طبیعی، ترمووود و کاربردهای معماری.",
+            Title = "دسته‌بندی قطعات پژو ۲۰۰۸ | mr2008.ir",
+            Description = "خرید قطعات موتور، ترمز، تعلیق، بدنه، برق و لوازم مصرفی پژو ۲۰۰۸.",
             CanonicalUrl = canonicalUrl ?? string.Empty
         });
 
@@ -160,7 +160,7 @@ public class CatalogController : PublicControllerBase
         var model = new ProductListViewModel
         {
             Title = currentCategory.Name,
-            Description = $"محصولات تخصصی دسته {currentCategory.Name} برای پروژه های چوب و ترمووود.",
+            Description = $"قطعات تخصصی {currentCategory.Name} مناسب پژو ۲۰۰۸ با بررسی فنی پیش از خرید.",
             HeroMediaUrl = heroMedia?.Url,
             HeroMediaAltText = heroMedia?.AltText ?? currentCategory.Name,
             Breadcrumbs = breadcrumbs,
