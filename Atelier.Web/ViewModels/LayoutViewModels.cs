@@ -4,8 +4,8 @@ namespace Atelier.Web.ViewModels;
 
 public class LayoutViewModel
 {
-    public string SiteName { get; set; } = "Atelier";
-    public string Tagline { get; set; } = "چوب و ترمووود برای پروژه های معماری";
+    public string SiteName { get; set; } = "mr2008.ir";
+    public string Tagline { get; set; } = "مرجع تخصصی قطعات پژو ۲۰۰۸";
     public string? LogoUrl { get; set; }
     public string? FaviconUrl { get; set; }
     public string? Address { get; set; }
