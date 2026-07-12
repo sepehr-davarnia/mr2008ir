@@ -5,6 +5,13 @@
     var title = ViewData["MetaTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? layout.SiteName;
     var description = ViewData["MetaDescription"]?.ToString();
     var canonical = SeoHelper.BuildCanonicalUrl(Context.Request, ViewData["CanonicalUrl"]?.ToString());
+    var ogImage = ViewData["OpenGraphImage"]?.ToString();
+    var ogType = ViewData["OpenGraphType"]?.ToString() ?? "website";
+    var organizationSchema = ViewData["OrganizationSchema"]?.ToString();
+    var websiteSchema = ViewData["WebsiteSchema"]?.ToString();
+    var pageSchema = ViewData["PageSchema"]?.ToString();
+    var productSchema = ViewData["ProductSchema"]?.ToString();
+    var breadcrumbSchema = ViewData["BreadcrumbSchema"]?.ToString();
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -15,7 +22,15 @@
     <title>@title</title>
     @if (!string.IsNullOrWhiteSpace(description)) { <meta name="description" content="@description" /> }
     <link rel="canonical" href="@canonical" />
-    <meta property="og:title" content="@title" /><meta property="og:type" content="website" /><meta property="og:url" content="@canonical" />
+    <meta property="og:title" content="@title" /><meta property="og:type" content="@ogType" /><meta property="og:url" content="@canonical" />
+    @if (!string.IsNullOrWhiteSpace(description)) { <meta property="og:description" content="@description" /><meta name="twitter:description" content="@description" /> }
+    @if (!string.IsNullOrWhiteSpace(ogImage)) { <meta property="og:image" content="@ogImage" /><meta name="twitter:image" content="@ogImage" /> }
+    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="@title" />
+    @if (!string.IsNullOrWhiteSpace(layout.FaviconUrl)) { <link rel="icon" href="@layout.FaviconUrl" /> }
+    @foreach (var schema in new[] { organizationSchema, websiteSchema, pageSchema, productSchema, breadcrumbSchema })
+    {
+        if (!string.IsNullOrWhiteSpace(schema)) { <script type="application/ld+json">@Html.Raw(schema)</script> }
+    }
     <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
