@@ -1,0 +1,101 @@
+@using Atelier.Web.Services
+@model Atelier.Web.Areas.Admin.ViewModels.BlogPostIndexViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "مدیریت بلاگ";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="admin-card mb-4">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+            <div>
+                <h1 class="h5 fw-bold mb-1">مقالات</h1>
+                <p class="text-muted mb-0">محتوای بلاگ برای سئو و ارتباط با مشتریان را مدیریت کنید.</p>
+            </div>
+            <a class="btn btn-success admin-action-btn" asp-area="Admin" asp-controller="Blog" asp-action="Create">
+                <i class="bi bi-plus-circle"></i>
+                افزودن مقاله
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success admin-alert" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <span>@successMessage</span>
+        </div>
+    }
+
+    @if (!Model.Posts.Any())
+    {
+        <div class="admin-card text-center">
+            <h2 class="h6 fw-bold mb-2">هنوز مقالهای ثبت نشده است.</h2>
+            <p class="text-muted mb-3">برای شروع، اولین مقاله را اضافه کنید.</p>
+            <a class="btn btn-success admin-action-btn" asp-area="Admin" asp-controller="Blog" asp-action="Create">افزودن مقاله</a>
+        </div>
+    }
+    else
+    {
+        <div class="admin-card">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>عنوان</th>
+                            <th>وضعیت</th>
+                            <th>تاریخ انتشار</th>
+                            <th class="text-end">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in Model.Posts)
+                        {
+                            var isPublished = post.PublishedAt.HasValue;
+                            <tr>
+                                <td class="fw-semibold">@post.Title</td>
+                                <td>
+                                    @if (isPublished)
+                                    {
+                                        <span class="badge bg-success">منتشر شده</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">پیشنویس</span>
+                                    }
+                                </td>
+                                <td>
+                                    @(post.PublishedAt.HasValue? LocalizationHelper.FormatDate(post.PublishedAt.Value) : "-")
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-primary btn-sm" asp-area="Admin" asp-controller="Blog" asp-action="Edit" asp-route-id="@post.Id">ویرایش</a>
+                                    @if (isPublished)
+                                    {
+                                        <form method="post" asp-area="Admin" asp-controller="Blog" asp-action="Unpublish" asp-route-id="@post.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">بازگشت به پیشنویس</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-area="Admin" asp-controller="Blog" asp-action="Publish" asp-route-id="@post.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success btn-sm">انتشار</button>
+                                        </form>
+                                    }
+                                    <form method="post" asp-area="Admin" asp-controller="Blog" asp-action="Delete" asp-route-id="@post.Id" class="d-inline" onsubmit="return confirm('آیا از حذف این مقاله مطمئن هستید؟ این عمل قابل بازگشت نیست.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+
+

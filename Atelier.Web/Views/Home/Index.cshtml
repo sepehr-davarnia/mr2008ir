@@ -1,0 +1,226 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.HomeViewModel
+@{
+    var heroSrc = ImageHelper.BuildResizedUrl(Model.HeroImageUrl, 1600) ?? Model.HeroImageUrl;
+    var heroSrcSet = ImageHelper.BuildSrcSet(Model.HeroImageUrl, ImageHelper.HeroBreakpoints);
+    var secondarySrc = ImageHelper.BuildResizedUrl(Model.SecondaryImageUrl, 1200) ?? Model.SecondaryImageUrl;
+    var secondarySrcSet = ImageHelper.BuildSrcSet(Model.SecondaryImageUrl, ImageHelper.HeroBreakpoints);
+    const string heroSizes = "(min-width: 1200px) 50vw, 100vw";
+    const string secondarySizes = "(min-width: 1200px) 40vw, 100vw";
+    const string cardSizes = "(min-width: 1200px) 360px, (min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw";
+}
+
+<div class="container-xxl py-5 page-shell">
+    <section class="hero-card gradient-surface mb-5 reveal">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+                <div class="badge text-bg-dark rounded-pill align-self-start px-3 py-2 hero-badge">ترموود | نما | کف</div>
+                <h1 class="display-6 fw-bold mb-0">@Model.HeroTitle</h1>
+                <p class="text-muted lead">@Model.HeroSubtitle</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-dark btn-lg" href="/categories">مشاهده دسته بندی ها</a>
+                    <a class="btn btn-outline-dark btn-lg" href="/pages/contact-us">مشاوره و سفارش</a>
+                </div>
+                <div class="d-flex flex-wrap gap-4 mt-2 hero-stats">
+                    <div>
+                        <div class="fs-2 fw-bold">+120</div>
+                        <div class="text-muted small">پروژه اجرا شده نما و کف</div>
+                    </div>
+                    <div>
+                        <div class="fs-2 fw-bold">+15</div>
+                        <div class="text-muted small">سال تجربه در ترمووود</div>
+                    </div>
+                    <div>
+                        <div class="fs-2 fw-bold">+30</div>
+                        <div class="text-muted small">پروفایل تخصصی وودزیلا</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl) || !string.IsNullOrWhiteSpace(Model.SecondaryImageUrl))
+                {
+                    <div class="hero-media-stack horizontal">
+                        @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
+                        {
+                            <figure class="hero-media">
+                                <img src="@heroSrc" srcset="@heroSrcSet" sizes="@heroSizes" alt="@(Model.HeroImageAltText ?? Model.HeroTitle)" loading="eager" fetchpriority="high" decoding="async" />
+                            </figure>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.SecondaryImageUrl))
+                        {
+                            <figure class="hero-media">
+                                <img src="@secondarySrc" srcset="@secondarySrcSet" sizes="@secondarySizes" alt="@(Model.SecondaryImageAltText ?? Model.HeroTitle)" loading="eager" fetchpriority="high" decoding="async" />
+                            </figure>
+                        }
+                    </div>
+                    <div class="content-card mt-3 position-relative subtle-glow">
+                        <div class="section-title d-flex align-items-center gap-2">
+                            <span>راهکارهای ما</span>
+                            <span class="badge bg-dark text-light rounded-pill">طراحی + اجرا</span>
+                        </div>
+                        <div class="d-flex flex-column gap-2 text-muted small">
+                            <span>تامین ترمووود فنلاندی و چوب وارداتی</span>
+                            <span>طراحی و اجرای نمای چوبی، کف و پرگولا</span>
+                            <span>مشاوره فنی و دیتیل اجرایی برای پروژه های معماری</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="content-card">
+                        <div class="section-title">راهکارهای ما</div>
+                        <div class="d-flex flex-column gap-2 text-muted">
+                            <span>تامین ترمووود فنلاندی و چوب وارداتی</span>
+                            <span>طراحی و اجرای نمای چوبی و کف فضای باز</span>
+                            <span>مشاوره فنی برای پروژه های معماری</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5 reveal">
+        <div class="section-title d-flex align-items-center justify-content-between">
+            <span>دسته بندی های اصلی</span>
+            <a class="btn btn-link fw-semibold text-decoration-none" href="/categories">مشاهده همه</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var category in Model.TopCategories)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="navigation-card reveal h-100">
+                        <div class="navigation-card-media">
+                            @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                            {
+                                var categorySrc = ImageHelper.BuildResizedUrl(category.ImageUrl, 720) ?? category.ImageUrl;
+                                var categorySrcSet = ImageHelper.BuildSrcSet(category.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                <img src="@categorySrc" srcset="@categorySrcSet" sizes="@cardSizes" alt="@category.ImageAltText" loading="lazy" decoding="async" />
+                            }
+                            else
+                            {
+                                <div class="navigation-card-placeholder"></div>
+                            }
+                        </div>
+                        <div class="navigation-card-body">
+                            <h3 class="h6 fw-bold mb-1">@category.Name</h3>
+                            <p class="text-muted small mb-3">@category.Summary</p>
+                            <a class="btn btn-outline-dark btn-sm" href="@category.Url">نمایش دسته بندی</a>
+                            <a class="stretched-link" href="@category.Url" aria-label="@category.Name"></a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="mb-5 reveal">
+        <div class="section-title d-flex align-items-center justify-content-between">
+            <span>محصولات منتخب</span>
+            <a class="btn btn-link fw-semibold text-decoration-none" href="/categories">نمایش همه محصولات</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="featured-product-card product-card reveal position-relative">                     
+                        @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                        {
+                            <div class="product-card-media">
+                                @{
+                                    var productSrc = ImageHelper.BuildResizedUrl(product.ImageUrl, 720) ?? product.ImageUrl;
+                                    var productSrcSet = ImageHelper.BuildSrcSet(product.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                }
+                                <img src="@productSrc" srcset="@productSrcSet" sizes="@cardSizes" alt="@product.ImageAltText" loading="lazy" decoding="async" />
+                            </div>
+                        }
+                        <div class="p-3 d-flex flex-column gap-3">
+                            <h3 class="h6 fw-bold mb-0">@product.Name</h3>
+                            @if (!string.IsNullOrWhiteSpace(product.ShortDescription))
+                            {
+                                <p class="text-muted small flex-grow-1">@product.ShortDescription</p>
+                            }
+                            else
+                            {
+                                <p class="text-muted small flex-grow-1 mb-0">مشخصات این محصول در حال تکمیل است.</p>
+                            }
+                            <div class="fw-semibold">@product.PriceDisplay</div>
+                            <a class="btn btn-dark btn-sm mt-auto" href="@product.Url">نمایش محصول</a>
+                            <a class="stretched-link" href="@product.Url" aria-label="@product.Name"></a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="mb-5 reveal">
+        <div class="section-title d-flex align-items-center justify-content-between">
+            <span>مطالب جدید بلاگ</span>
+            <a class="btn btn-link fw-semibold text-decoration-none" href="/blog">مشاهده بلاگ</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var post in Model.LatestPosts)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="card-soft hover-float reveal blog-card">
+                        @if (!string.IsNullOrWhiteSpace(post.ImageUrl))
+                        {
+                            <div class="blog-card-media">
+                                @{
+                                    var postSrc = ImageHelper.BuildResizedUrl(post.ImageUrl, 720) ?? post.ImageUrl;
+                                    var postSrcSet = ImageHelper.BuildSrcSet(post.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                }
+                                <img src="@postSrc" srcset="@postSrcSet" sizes="@cardSizes" alt="@post.Title" loading="lazy" decoding="async" />
+                            </div>
+                        }
+                        <div class="p-3 d-flex flex-column gap-2">
+                            <div class="text-muted small mb-2">@post.PublishedAt</div>
+                            <h3 class="h6 fw-bold">@post.Title</h3>
+                            <p class="text-muted small flex-grow-1 mb-0">@post.Excerpt</p>
+                            <a class="btn btn-outline-dark btn-sm mt-auto align-self-start" href="@post.Url">ادامه مقاله</a>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="reveal">
+        <div class="section-title d-flex align-items-center justify-content-between">
+            <span>پروژه های اخیر</span>
+            <a class="btn btn-link fw-semibold text-decoration-none" href="/projects">مشاهده تمام پروژه ها</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var project in Model.FeaturedProjects)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card-soft project-card hover-float reveal">
+                        @if (!string.IsNullOrWhiteSpace(project.ImageUrl))
+                        {
+                            <div class="project-card-media">
+                                @{
+                                    var projectSrc = ImageHelper.BuildResizedUrl(project.ImageUrl, 900) ?? project.ImageUrl;
+                                    var projectSrcSet = ImageHelper.BuildSrcSet(project.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                }
+                                <img src="@projectSrc" srcset="@projectSrcSet" sizes="@cardSizes" alt="@project.ImageAltText" loading="lazy" decoding="async" />
+                            </div>
+                        }
+                        <div class="p-3 d-flex flex-column gap-2">
+                            <h3 class="h6 fw-bold mb-0">@project.Title</h3>
+                            @if (!string.IsNullOrWhiteSpace(project.Summary))
+                            {
+                                <p class="text-muted small flex-grow-1">@project.Summary</p>
+                            }
+                            else
+                            {
+                                <p class="text-muted small flex-grow-1 mb-0">جزئیات این پروژه در حال تکمیل است.</p>
+                            }
+                            <a class="btn btn-outline-dark btn-sm mt-auto" href="@project.Url">مشاهده پروژه</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>

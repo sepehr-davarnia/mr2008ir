@@ -1,0 +1,119 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var pageTitle = ViewData["Title"]?.ToString() ?? "پنل مدیریت";
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle - پنل مدیریت آتلیه چوب</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body class="admin-body">
+    <div class="admin-shell d-flex">
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <div class="admin-brand-icon">
+                    <i class="bi bi-tree"></i>
+                </div>
+                <div>
+                    <div class="admin-brand-title">آتلیه چوب</div>
+                    <div class="admin-brand-subtitle">پنل مدیریت</div>
+                </div>
+            </div>
+
+            <nav class="admin-nav">
+                <a class="admin-nav-link @(currentController == "Dashboard" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>داشبورد</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Products" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Products" asp-action="Index">
+                    <i class="bi bi-box-seam"></i>
+                    <span>محصولات</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Products" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Products" asp-action="Pricing">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>مدیریت قیمت‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Blog" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Blog" asp-action="Index">
+                    <i class="bi bi-journal-text"></i>
+                    <span>بلاگ</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Pages" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Pages" asp-action="Index">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>صفحات</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Projects" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Projects" asp-action="Index">
+                    <i class="bi bi-lightning-charge"></i>
+                    <span>پروژه‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Categories" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                    <i class="bi bi-tags"></i>
+                    <span>دسته‌بندی‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Leads" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Leads" asp-action="Index">
+                    <i class="bi bi-chat-dots"></i>
+                    <span>درخواست‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Media" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Media" asp-action="Index">
+                    <i class="bi bi-images"></i>
+                    <span>رسانه‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Settings" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Settings" asp-action="Index">
+                    <i class="bi bi-sliders"></i>
+                    <span>تنظیمات</span>
+                </a>
+            </nav>
+
+            <div class="admin-logout">
+                <a class="admin-nav-link text-danger" asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>خروج</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="admin-main flex-grow-1">
+            <header class="admin-header">
+                <div>
+                    <h1 class="admin-page-title">@pageTitle</h1>
+                    <p class="admin-page-subtitle">مدیریت حرفه‌ای محصولات و تنظیمات کسب‌وکار شما</p>
+                </div>
+                <a class="btn btn-outline-danger admin-logout-button" asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+                    خروج
+                    <i class="bi bi-box-arrow-left"></i>
+                </a>
+            </header>
+
+            <main class="admin-content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mediaManagerModal" tabindex="-1" aria-hidden="true" data-picker-url="@Url.Action("Picker", "MediaManager", new { area = "Admin" })" data-list-url="@Url.Action("List", "MediaManager", new { area = "Admin" })" data-upload-url="@Url.Action("Upload", "MediaManager", new { area = "Admin" })" data-update-alt-url="@Url.Action("UpdateAltText", "MediaManager", new { area = "Admin" })">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">مدیریت رسانه</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" data-media-modal-body>
+                    در حال بارگذاری...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    <script src="~/js/media-manager.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

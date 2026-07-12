@@ -1,0 +1,60 @@
+@model Atelier.Web.Areas.Admin.ViewModels.CategoryEditViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "ویرایش دسته‌بندی";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="admin-form-card">
+        <div class="mb-4">
+            <h1 class="h5 fw-bold mb-1">ویرایش دسته‌بندی</h1>
+            <p class="text-muted mb-0">اطلاعات دسته‌بندی را به‌روز کنید.</p>
+        </div>
+
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="alert alert-danger admin-alert" role="alert">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>@errorMessage</span>
+            </div>
+        }
+
+        <form method="post" class="admin-form" data-admin-form>
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control admin-input" placeholder="عنوان دسته‌بندی" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Slug" class="form-label"></label>
+                <input asp-for="Slug" class="form-control admin-input" placeholder="اسلاگ دسته‌بندی" />
+                <div class="form-text">در صورت خالی بودن، اسلاگ به‌صورت خودکار ساخته می‌شود.</div>
+                <span asp-validation-for="Slug" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="MediaId" class="form-label">تصویر دسته‌بندی</label>
+                <input type="hidden" asp-for="MediaId" id="CategoryMediaId" />
+                <div class="d-flex align-items-center gap-3">
+                    <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 160px; height: 110px;">
+                        <img id="categoryMediaPreview" src="@Model.MediaPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.MediaPreviewUrl) ? "d-none" : string.Empty)" alt="پیش‌نمایش تصویر دسته‌بندی" />
+                        <span id="categoryMediaPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.MediaPreviewUrl) ? string.Empty : "d-none")">بدون تصویر</span>
+                    </div>
+                    <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'CategoryMediaId', previewImageId: 'categoryMediaPreview', placeholderId: 'categoryMediaPlaceholder', selectedMediaId: @(Model.MediaId ?? 0) });">
+                        انتخاب تصویر
+                    </button>
+                </div>
+                <span asp-validation-for="MediaId" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <button type="submit" class="btn btn-success admin-action-btn" data-loading-text="در حال ذخیره...">ذخیره</button>
+                <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Categories" asp-action="Index">بازگشت به لیست</a>
+            </div>
+        </form>
+    </div>
+</div>

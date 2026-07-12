@@ -1,0 +1,78 @@
+@model Atelier.Web.Areas.Admin.ViewModels.MediaManagerPickerViewModel
+@{
+    var selectedMediaId = ViewData["SelectedMediaId"] as int?;
+}
+
+<div class="media-manager" dir="rtl">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h6 fw-bold mb-0">انتخاب تصویر</h2>
+        <span class="text-muted small">حداکثر حجم مجاز: @Model.MaxUploadSizeDisplay مگابایت</span>
+    </div>
+
+    <div class="media-manager-status text-success small mb-3" data-media-status></div>
+    <div class="media-manager-status text-danger small mb-3 d-none" data-media-warning></div>
+
+    <div class="media-grid-scroll">
+        <div class="media-grid mb-3" data-media-grid data-page="@Model.Page" data-has-more="@Model.HasMore.ToString().ToLowerInvariant()">
+            @if (!Model.Items.Any())
+            {
+                <div class="text-muted">هنوز تصویری بارگذاری نشده است.</div>
+            }
+            else
+            {
+                foreach (var item in Model.Items)
+                {
+                    var isSelected = selectedMediaId.HasValue && selectedMediaId.Value == item.Id;
+                    var isMissingAlt = !item.HasAltText;
+                    <button type="button"
+                            class="media-tile @(isSelected ? "selected" : string.Empty) @(isMissingAlt ? "missing-alt" : string.Empty)"
+                            data-media-item
+                            data-media-id="@item.Id"
+                            data-media-url="@item.ThumbnailUrl"
+                            data-media-title="@item.Title"
+                            data-media-alt-text="@item.AltText">
+                        <span class="media-thumb">
+                            <img src="@item.SizedUrl"
+                                 srcset="@item.SrcSet"
+                                 sizes="(max-width: 768px) 45vw, 220px"
+                                 alt="@item.Title"
+                                 loading="lazy"
+                                 class="media-thumb-img" />
+                        </span>
+                        <span class="media-title">@item.Title</span>
+                        <span class="media-alt-text @(isMissingAlt ? "text-danger" : "text-muted") small">
+                            @(isMissingAlt ? "بدون متن جایگزین" : item.AltText)
+                        </span>
+                        @if (isMissingAlt)
+                        {
+                            <span class="media-alt-action">
+                                <span class="btn btn-link btn-sm p-0 text-danger" role="button" tabindex="0" data-media-edit-alt data-media-id="@item.Id">ثبت Alt Text</span>
+                            </span>
+                        }
+                    </button>
+                }
+            }
+        </div>
+        @if (Model.HasMore)
+        {
+            <div class="d-flex justify-content-center mb-3">
+                <button type="button" class="btn btn-outline-secondary w-100" data-media-load-more data-next-page="@Model.NextPage">نمایش بیشتر</button>
+            </div>
+        }
+    </div>
+
+    <div class="media-upload">
+        <h3 class="h6 fw-bold mb-2">آپلود تصویر جدید</h3>
+        <form method="post" enctype="multipart/form-data" data-media-upload-form>
+            @Html.AntiForgeryToken()
+            <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center">
+                <input class="form-control admin-input" type="file" name="file" accept="image/jpeg,image/png,image/webp" />
+                <input class="form-control admin-input" type="text" name="title" placeholder="عنوان تصویر (اختیاری)" />
+                <input class="form-control admin-input" type="text" name="altText" placeholder="متن جایگزین (الزامی)" required />
+                <button type="submit" class="btn btn-primary admin-action-btn">آپلود</button>
+            </div>
+            <div class="form-text mt-2 text-muted">وارد کردن متن جایگزین تصویر (Alt Text) برای سئو الزامی است.</div>
+            <div class="text-danger small mt-2" data-media-error></div>
+        </form>
+    </div>
+</div>

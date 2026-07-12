@@ -1,0 +1,162 @@
+@model Atelier.Web.Areas.Admin.ViewModels.SettingsViewModel
+
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "تنظیمات";
+}
+
+<div class="admin-form-card">
+    <h2 class="h4 fw-bold mb-4">تنظیمات اطلاعات کسب‌وکار</h2>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success admin-alert mb-4" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@successMessage</span>
+        </div>
+    }
+
+    <form method="post" class="row g-4">
+        @Html.AntiForgeryToken()
+
+        <div class="col-12">
+            <label asp-for="SiteName" class="form-label fw-semibold"></label>
+            <input asp-for="SiteName" class="form-control admin-input" placeholder="نام برند یا وب‌سایت" />
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Address" class="form-label fw-semibold"></label>
+            <textarea asp-for="Address" class="form-control admin-input" rows="3" placeholder="آدرس کامل کارگاه یا فروشگاه"></textarea>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Phone" class="form-label fw-semibold"></label>
+            <input asp-for="Phone" class="form-control admin-input" placeholder="شماره تماس ثابت" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Mobile" class="form-label fw-semibold"></label>
+            <input asp-for="Mobile" class="form-control admin-input" placeholder="شماره موبایل" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="WhatsApp" class="form-label fw-semibold"></label>
+            <input asp-for="WhatsApp" class="form-control admin-input" placeholder="لینک یا شماره واتساپ" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Instagram" class="form-label fw-semibold"></label>
+            <input asp-for="Instagram" class="form-control admin-input" placeholder="آدرس اینستاگرام" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Telegram" class="form-label fw-semibold"></label>
+            <input asp-for="Telegram" class="form-control admin-input" placeholder="آی‌دی تلگرام" />
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Email" class="form-label fw-semibold"></label>
+            <input asp-for="Email" class="form-control admin-input" placeholder="ایمیل" />
+        </div>
+
+        <div class="col-12">
+            <div class="admin-card">
+                <h3 class="h6 fw-bold mb-3">برندینگ سایت</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="LogoMediaId" class="form-label fw-semibold">لوگو</label>
+                        <input type="hidden" asp-for="LogoMediaId" id="LogoMediaId" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 140px; height: 100px;">
+                                <img id="logoPreview" src="@Model.LogoPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.LogoPreviewUrl) ? "d-none" : string.Empty)" alt="لوگو" />
+                                <span id="logoPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.LogoPreviewUrl) ? string.Empty : "d-none")">بدون لوگو</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'LogoMediaId', previewImageId: 'logoPreview', placeholderId: 'logoPlaceholder', selectedMediaId: @(Model.LogoMediaId ?? 0) });">
+                                انتخاب لوگو
+                            </button>
+                        </div>
+                        <span asp-validation-for="LogoMediaId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="FaviconMediaId" class="form-label fw-semibold">فاوآیکن</label>
+                        <input type="hidden" asp-for="FaviconMediaId" id="FaviconMediaId" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 140px; height: 100px;">
+                                <img id="faviconPreview" src="@Model.FaviconPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.FaviconPreviewUrl) ? "d-none" : string.Empty)" alt="فاوآیکن" />
+                                <span id="faviconPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.FaviconPreviewUrl) ? string.Empty : "d-none")">بدون فاوآیکن</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'FaviconMediaId', previewImageId: 'faviconPreview', placeholderId: 'faviconPlaceholder', selectedMediaId: @(Model.FaviconMediaId ?? 0) });">
+                                انتخاب فاوآیکن
+                            </button>
+                        </div>
+                        <span asp-validation-for="FaviconMediaId" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="admin-card">
+                <h3 class="h6 fw-bold mb-3">تصاویر عمومی</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="HomeHeroMediaId" class="form-label fw-semibold">تصویر هیرو صفحه اصلی</label>
+                        <input type="hidden" asp-for="HomeHeroMediaId" id="HomeHeroMediaId" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 140px; height: 100px;">
+                                <img id="homeHeroPreview" src="@Model.HomeHeroPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.HomeHeroPreviewUrl) ? "d-none" : string.Empty)" alt="هیرو صفحه اصلی" />
+                                <span id="homeHeroPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.HomeHeroPreviewUrl) ? string.Empty : "d-none")">بدون تصویر</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'HomeHeroMediaId', previewImageId: 'homeHeroPreview', placeholderId: 'homeHeroPlaceholder', selectedMediaId: @(Model.HomeHeroMediaId ?? 0) });">
+                                انتخاب تصویر
+                            </button>
+                        </div>
+                        <span asp-validation-for="HomeHeroMediaId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="HomeSecondaryMediaId" class="form-label fw-semibold">تصویر ثانویه صفحه اصلی</label>
+                        <input type="hidden" asp-for="HomeSecondaryMediaId" id="HomeSecondaryMediaId" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 140px; height: 100px;">
+                                <img id="homeSecondaryPreview" src="@Model.HomeSecondaryPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.HomeSecondaryPreviewUrl) ? "d-none" : string.Empty)" alt="تصویر ثانویه صفحه اصلی" />
+                                <span id="homeSecondaryPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.HomeSecondaryPreviewUrl) ? string.Empty : "d-none")">بدون تصویر</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'HomeSecondaryMediaId', previewImageId: 'homeSecondaryPreview', placeholderId: 'homeSecondaryPlaceholder', selectedMediaId: @(Model.HomeSecondaryMediaId ?? 0) });">
+                                انتخاب تصویر
+                            </button>
+                        </div>
+                        <span asp-validation-for="HomeSecondaryMediaId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DefaultCategoryMediaId" class="form-label fw-semibold">تصویر پیش فرض دسته بندی ها</label>
+                        <input type="hidden" asp-for="DefaultCategoryMediaId" id="DefaultCategoryMediaId" />
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="border rounded-4 bg-light d-flex align-items-center justify-content-center" style="width: 140px; height: 100px;">
+                                <img id="defaultCategoryPreview" src="@Model.DefaultCategoryPreviewUrl" class="img-fluid rounded-3 @(string.IsNullOrWhiteSpace(Model.DefaultCategoryPreviewUrl) ? "d-none" : string.Empty)" alt="تصویر پیش فرض دسته بندی" />
+                                <span id="defaultCategoryPlaceholder" class="text-muted small @(string.IsNullOrWhiteSpace(Model.DefaultCategoryPreviewUrl) ? string.Empty : "d-none")">بدون تصویر</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary admin-action-btn" onclick="openMediaManager({ targetInputId: 'DefaultCategoryMediaId', previewImageId: 'defaultCategoryPreview', placeholderId: 'defaultCategoryPlaceholder', selectedMediaId: @(Model.DefaultCategoryMediaId ?? 0) });">
+                                انتخاب تصویر
+                            </button>
+                        </div>
+                        <span asp-validation-for="DefaultCategoryMediaId" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="MaxUploadSizeKb" class="form-label fw-semibold"></label>
+            <input asp-for="MaxUploadSizeKb" class="form-control admin-input" placeholder="مثلاً 5120 (معادل 5 مگابایت)" />
+            <span asp-validation-for="MaxUploadSizeKb" class="text-danger small"></span>
+            <div class="form-text">این مقدار حداکثر حجم فایل‌های آپلودی در سیستم را مشخص می‌کند.</div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-start">
+            <button type="submit" class="btn btn-primary admin-action-btn">
+                <i class="bi bi-save2"></i>
+                ذخیره تنظیمات
+            </button>
+        </div>
+    </form>
+</div>

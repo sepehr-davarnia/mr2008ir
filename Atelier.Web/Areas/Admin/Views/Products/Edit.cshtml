@@ -1,0 +1,156 @@
+@using Atelier.Domain.Enums
+@model Atelier.Web.Areas.Admin.ViewModels.ProductEditViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "ویرایش محصول";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="row g-4">
+        <div class="col-12 col-xl-7">
+            <div class="admin-form-card">
+                <div class="mb-4">
+                    <h1 class="h5 fw-bold mb-1">ویرایش محصول</h1>
+                    <p class="text-muted mb-0">جزئیات محصول را به‌روزرسانی کنید.</p>
+                </div>
+
+                @if (TempData["SuccessMessage"] is string successMessage)
+                {
+                    <div class="alert alert-success admin-alert" role="alert">
+                        <i class="bi bi-check-circle"></i>
+                        <span>@successMessage</span>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] is string errorMessage)
+                {
+                    <div class="alert alert-danger admin-alert" role="alert">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span>@errorMessage</span>
+                    </div>
+                }
+
+                <form method="post" class="admin-form" data-admin-form>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control admin-input" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Slug" class="form-label"></label>
+                        <input asp-for="Slug" class="form-control admin-input" />
+                        <span asp-validation-for="Slug" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control admin-input" rows="4"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Price" class="form-label"></label>
+                        <input asp-for="Price" class="form-control admin-input" type="number" step="1000" min="0" />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select admin-input">
+                            <option value="@ProductStatus.Draft">پیش‌نویس</option>
+                            <option value="@ProductStatus.Published">منتشر شده</option>
+                            <option value="@ProductStatus.Archived">بایگانی</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <button type="submit" class="btn btn-success admin-action-btn" data-loading-text="در حال ذخیره...">ذخیره تغییرات</button>
+                        <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Products" asp-action="Index">بازگشت</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5">
+            <div class="admin-form-card mb-4">
+                <h2 class="h6 fw-bold mb-3">افزودن تصویر</h2>
+                <p class="text-muted mb-3">از کتابخانه رسانه تصویر انتخاب کنید یا تصویر جدیدی آپلود کنید.</p>
+                <form id="mediaLibraryForm" method="post" asp-area="Admin" asp-controller="Products" asp-action="AddMediaFromLibrary">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" id="SelectedMediaId" name="mediaId" />
+                    <button type="button" class="btn btn-success w-100 admin-action-btn" onclick="openMediaManager({ targetInputId: 'SelectedMediaId', formId: 'mediaLibraryForm' });">
+                        افزودن تصویر
+                    </button>
+                </form>
+            </div>
+
+            <div class="admin-form-card">
+                <h2 class="h6 fw-bold mb-3">گالری تصاویر محصول</h2>
+
+                @if (!Model.Gallery.Any())
+                {
+                    <div class="alert alert-light border mb-0">
+                        هنوز تصویری برای این محصول ثبت نشده است.
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var media in Model.Gallery)
+                        {
+                            var imageTitle = string.IsNullOrWhiteSpace(media.Title) ? "فایل محصول" : media.Title;
+                            var imageAlt = string.IsNullOrWhiteSpace(media.AltText) ? "فایل محصول" : media.AltText;
+                            var isPdf = string.Equals(media.ContentType, "application/pdf", StringComparison.OrdinalIgnoreCase);
+                            var mediaUrl = Url.Action("Serve", "Media", new { area = "Admin", mediaId = media.Id });
+                            <div class="col-6">
+                                <div class="card h-100 border-0 shadow-sm admin-card-hover">
+                                    @if (isPdf)
+                                    {
+                                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 160px;">
+                                            <div class="text-center text-muted">
+                                                <i class="bi bi-file-earmark-pdf fs-1"></i>
+                                                <div class="small mt-2">فایل PDF</div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <img class="card-img-top" src="@mediaUrl" alt="@imageAlt" />
+                                    }
+                                    <div class="card-body p-3">
+                                        <div class="fw-semibold small">@imageTitle</div>
+                                        <div class="text-muted small">@imageAlt</div>
+                                        @if (isPdf && mediaUrl is not null)
+                                        {
+                                            <a class="small d-inline-flex align-items-center gap-1 mt-2" href="@mediaUrl" target="_blank" rel="noopener">
+                                                مشاهده فایل
+                                                <i class="bi bi-box-arrow-up-left"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                    <div class="card-footer bg-transparent border-0 p-3 pt-0">
+                                        <form method="post" asp-area="Admin" asp-controller="Products" asp-action="RemoveMedia" onsubmit="return confirm('آیا از حذف این تصویر مطمئن هستید؟ این عمل قابل بازگشت نیست.');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@Model.Id" />
+                                            <input type="hidden" name="mediaId" value="@media.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">حذف فایل</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

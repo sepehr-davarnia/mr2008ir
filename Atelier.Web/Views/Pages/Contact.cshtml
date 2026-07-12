@@ -1,0 +1,85 @@
+@model Atelier.Web.ViewModels.ContactPageViewModel
+
+@functions{
+    string GetFieldValue(string name) => name switch
+    {
+        nameof(Atelier.Web.ViewModels.ContactFormInputModel.Name) => Model.FormInput.Name,
+        nameof(Atelier.Web.ViewModels.ContactFormInputModel.Email) => Model.FormInput.Email,
+        nameof(Atelier.Web.ViewModels.ContactFormInputModel.Phone) => Model.FormInput.Phone ?? string.Empty,
+        nameof(Atelier.Web.ViewModels.ContactFormInputModel.Message) => Model.FormInput.Message,
+        _ => string.Empty
+    };
+
+    string? GetFieldError(string name)
+    {
+        if (ViewData.ModelState.TryGetValue(name, out var entry) && entry.Errors.Any())
+        {
+            return entry.Errors.First().ErrorMessage;
+        }
+
+        return null;
+    }
+}
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card mb-4">
+        <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Content))
+        {
+            <p class="text-muted mb-0">@Html.Raw(Model.Content)</p>
+        }
+        else
+        {
+            <p class="text-muted mb-0">برای ارتباط با ما اطلاعات خود را وارد کنید.</p>
+        }
+    </section>
+
+    <div class="content-card">
+        <div class="row g-4">
+            <div class="col-12 col-lg-6">
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <div class="fw-bold mb-1">@Model.Form.Title</div>
+                        <p class="text-muted small mb-0">@Model.Form.Description</p>
+                    </div>
+                    @if (Model.Submitted)
+                    {
+                        <div class="alert alert-success mb-0">
+                            پیام شما ثبت شد. همکاران ما در اولین فرصت با شما تماس می‌گیرند.
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <form method="post" asp-action="SubmitContact" asp-controller="Pages" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var field in Model.Form.Fields)
+                        {
+                            var value = GetFieldValue(field.Name);
+                            var error = GetFieldError(field.Name);
+                            <div class="form-floating">
+                                @if (field.Type == "textarea")
+                                {
+                                    <textarea class="form-control @(error is not null ? "is-invalid" : string.Empty)" placeholder="@field.Placeholder" name="@field.Name" id="@field.Name" rows="4" required="@(field.IsRequired ? "required" : null)">@value</textarea>
+                                }
+                                else
+                                {
+                                    <input type="@field.Type" class="form-control @(error is not null ? "is-invalid" : string.Empty)" id="@field.Name" name="@field.Name" placeholder="@field.Placeholder" value="@value" required="@(field.IsRequired ? "required" : null)" />
+                                }
+                                <label for="@field.Name">@field.Label</label>
+                                @if (error is not null)
+                                {
+                                    <div class="invalid-feedback">@error</div>
+                                }
+                            </div>
+                        }
+                        <button class="btn btn-dark" type="submit">ارسال پیام</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

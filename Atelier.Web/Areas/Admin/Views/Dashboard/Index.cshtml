@@ -1,0 +1,67 @@
+@model Atelier.Web.Areas.Admin.ViewModels.DashboardViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "داشبورد";
+}
+
+<section class="mb-4">
+    <div class="admin-card">
+        <h2 class="h4 fw-bold mb-2">به پنل مدیریت آتلیه چوب خوش آمدید ✨</h2>
+        <p class="mb-0 text-muted">اینجا همه‌چیز برای مدیریت دقیق و حرفه‌ای محصولات شما آماده است. با افتخار کسب‌وکار خودتان را هدایت کنید.</p>
+    </div>
+</section>
+
+<section class="row g-4 mb-4">
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="admin-card">
+            <div class="card-label">محصولات (منتشر شده / کل)</div>
+            <div class="card-value">@Model.PublishedProductsCount / @Model.ProductsCount</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="admin-card">
+            <div class="card-label">پروژه‌ها (منتشر شده / کل)</div>
+            <div class="card-value">@Model.PublishedProjectsCount / @Model.ProjectsCount</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="admin-card">
+            <div class="card-label">دسته‌بندی‌ها</div>
+            <div class="card-value">@Model.CategoriesCount</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="admin-card">
+            <div class="card-label">مطالب بلاگ</div>
+            <div class="card-value">@Model.BlogPostsCount</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="admin-card">
+            <div class="card-label">درخواست‌های تماس</div>
+            <div class="card-value">@Model.LeadsCount</div>
+        </div>
+    </div>
+</section>
+
+<section class="admin-card">
+    <h3 class="h5 fw-bold mb-3">اقدامات سریع</h3>
+    <div class="d-flex flex-wrap gap-3">
+        <a class="btn btn-primary admin-action-btn" asp-area="Admin" asp-controller="Products" asp-action="Create">
+            <i class="bi bi-plus-circle"></i>
+            افزودن محصول جدید
+        </a>
+        <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Projects" asp-action="Create">
+            <i class="bi bi-building"></i>
+            ثبت پروژه جدید
+        </a>
+        <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Blog" asp-action="Create">
+            <i class="bi bi-journal-plus"></i>
+            ایجاد مطلب بلاگ
+        </a>
+        <a class="btn btn-outline-secondary admin-action-btn" asp-area="" asp-page="/Index">
+            <i class="bi bi-box-arrow-up-right"></i>
+            مشاهده سایت
+        </a>
+    </div>
+</section>

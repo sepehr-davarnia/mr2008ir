@@ -1,0 +1,111 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.ProductListViewModel
+@{
+    const string heroSizes = "(min-width: 1200px) 360px, (min-width: 992px) 40vw, 100vw";
+    const string cardSizes = "(min-width: 1200px) 360px, (min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw";
+}
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card mb-4 reveal">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-8">
+                <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
+                <p class="text-muted mb-0">@Model.Description</p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.HeroMediaUrl))
+            {
+                <div class="col-12 col-lg-4">
+                    <div class="hero-media hero-media-inline">
+                        @{
+                            var heroSrc = ImageHelper.BuildResizedUrl(Model.HeroMediaUrl, 960) ?? Model.HeroMediaUrl;
+                            var heroSrcSet = ImageHelper.BuildSrcSet(Model.HeroMediaUrl, ImageHelper.HeroBreakpoints);
+                        }
+                        <img src="@heroSrc" srcset="@heroSrcSet" sizes="@heroSizes" alt="@Model.HeroMediaAltText" loading="eager" fetchpriority="high" decoding="async" />
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    @if (Model.Subcategories.Any())
+    {
+        <section class="mb-4">
+            <div class="section-title">زیر دسته ها</div>
+            <div class="row g-4">
+                @foreach (var category in Model.Subcategories)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <article class="card-soft h-100 category-card hover-float reveal">
+                            <a class="text-decoration-none" href="@category.Url">
+                                <div class="category-card-media">
+                                    @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                                    {
+                                        var categorySrc = ImageHelper.BuildResizedUrl(category.ImageUrl, 900) ?? category.ImageUrl;
+                                        var categorySrcSet = ImageHelper.BuildSrcSet(category.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                        <img src="@categorySrc" srcset="@categorySrcSet" sizes="@cardSizes" alt="@category.ImageAltText" loading="lazy" decoding="async" />
+                                    }
+                                    else
+                                    {
+                                        <div class="category-card-placeholder"></div>
+                                    }
+                                </div>
+                                <div class="p-3 d-flex flex-column gap-1">
+                                    <h2 class="h6 fw-bold mb-1">@category.Name</h2>
+                                    <p class="text-muted small mb-0">@category.Summary</p>
+                                </div>
+                            </a>
+                        </article>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="reveal">
+        <div class="section-title">محصولات</div>
+        @if (!Model.Products.Any())
+        {
+            <div class="content-card text-center">
+                <p class="text-muted mb-0">برای این دسته محصولی ثبت نشده است.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card-soft h-100 product-card hover-float reveal position-relative">
+                            @if (!string.IsNullOrWhiteSpace(product.ImageUrl))
+                            {
+                                <div class="product-card-media">
+                                    @{
+                                        var productSrc = ImageHelper.BuildResizedUrl(product.ImageUrl, 720) ?? product.ImageUrl;
+                                        var productSrcSet = ImageHelper.BuildSrcSet(product.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                    }
+                                    <img src="@productSrc" srcset="@productSrcSet" sizes="@cardSizes" alt="@product.ImageAltText" loading="lazy" decoding="async" />
+                                </div>
+                            }
+                            <div class="p-3 d-flex flex-column gap-2 h-100">
+                                <h2 class="h6 fw-bold mb-0">@product.Name</h2>
+                                @if (!string.IsNullOrWhiteSpace(product.ShortDescription))
+                                {
+                                    <p class="text-muted small flex-grow-1">@product.ShortDescription</p>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small flex-grow-1 mb-0">جزئیات این محصول به زودی تکمیل می‌شود.</p>
+                                }
+                                <div class="fw-semibold">@product.PriceDisplay</div>
+                                <a class="btn btn-outline-dark btn-sm mt-auto" href="@product.Url">جزئیات محصول</a>
+                                <a class="stretched-link" href="@product.Url" aria-label="@product.Name"></a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>

@@ -1,0 +1,69 @@
+@model Atelier.Web.ViewModels.ProjectDetailViewModel
+@{
+    const string heroSizes = "(min-width: 1200px) 540px, (min-width: 992px) 50vw, 100vw";
+    const string gallerySizes = "(min-width: 1200px) 25vw, (min-width: 992px) 33vw, 50vw";
+}
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card project-hero mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-6">
+                <h1 class="h4 fw-bold mb-3">@Model.Title</h1>
+                @if (!string.IsNullOrWhiteSpace(Model.Summary))
+                {
+                    <p class="text-muted mb-4">@Model.Summary</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <div class="text-muted small lh-lg">@Model.Description</div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">اطلاعات این پروژه در حال تکمیل است.</p>
+                }
+            </div>
+            <div class="col-12 col-lg-6">
+                @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
+                {
+                    <div class="project-hero-media">
+                        @{
+                            var heroSrc = ImageHelper.BuildResizedUrl(Model.HeroImageUrl, 1280) ?? Model.HeroImageUrl;
+                            var heroSrcSet = ImageHelper.BuildSrcSet(Model.HeroImageUrl, ImageHelper.HeroBreakpoints);
+                        }
+                        <img src="@heroSrc" srcset="@heroSrcSet" sizes="@heroSizes" alt="@Model.HeroImageAltText" class="img-fluid rounded-4 w-100" loading="eager" fetchpriority="high" decoding="async" />
+                    </div>
+                }
+                else
+                {
+                    <div class="project-hero-placeholder"></div>
+                }
+            </div>
+        </div>
+    </section>
+
+    @if (Model.Gallery.Any())
+    {
+        <section class="project-gallery">
+            <div class="section-title d-flex align-items-center justify-content-between gap-2">
+                <span>گالری تصاویر</span>
+                <span class="badge bg-light text-dark fw-semibold">@(Model.Gallery.Count) تصویر</span>
+            </div>
+            <div class="row g-3">
+                @foreach (var media in Model.Gallery)
+                {
+                    <div class="col-6 col-lg-3">
+                        <div class="project-gallery-item">
+                            @{
+                                var mediaSrc = ImageHelper.BuildResizedUrl(media.Url, 720) ?? media.Url;
+                                var mediaSrcSet = ImageHelper.BuildSrcSet(media.Url, ImageHelper.GalleryBreakpoints);
+                            }
+                            <img src="@mediaSrc" srcset="@mediaSrcSet" sizes="@gallerySizes" alt="@(media.AltText ?? Model.Title)" loading="lazy" decoding="async" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>

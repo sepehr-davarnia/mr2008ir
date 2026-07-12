@@ -1,0 +1,65 @@
+@using Atelier.Web.Services
+@model IReadOnlyList<Atelier.Web.Areas.Admin.ViewModels.LeadListItemViewModel>
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "درخواست‌ها";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="admin-card">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+            <div>
+                <h1 class="h5 fw-bold mb-1">درخواست‌های مشتریان</h1>
+                <p class="text-muted mb-0">لیست پیام‌های ثبت شده توسط مشتریان.</p>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="alert alert-success admin-alert" role="alert">
+                <i class="bi bi-check-circle"></i>
+                <span>@successMessage</span>
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-light border mb-0">
+                هنوز درخواستی ثبت نشده است.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>نام</th>
+                            <th>اطلاعات تماس</th>
+                            <th>تاریخ</th>
+                            <th class="text-end">عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lead in Model)
+                        {
+                            <tr>
+                                <td>@lead.Name</td>
+                                <td>@lead.Email</td>
+                                <td>@LocalizationHelper.FormatDate(lead.CreatedAt)</td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-primary btn-sm" asp-area="Admin" asp-controller="Leads" asp-action="Details" asp-route-id="@lead.Id">جزئیات</a>
+                                    <form method="post" class="d-inline" asp-area="Admin" asp-controller="Leads" asp-action="Delete" onsubmit="return confirm('آیا از حذف این درخواست مطمئن هستید؟');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@lead.Id" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">حذف</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

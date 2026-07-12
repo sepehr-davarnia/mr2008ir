@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Atelier.Domain/Atelier.Domain.csproj" />
+  <Project Path="Atelier.Infrastructure/Atelier.Infrastructure.csproj" />
+  <Project Path="Atelier.Web/Atelier.Web.csproj" />
+</Solution>

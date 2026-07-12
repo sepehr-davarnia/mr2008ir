@@ -1,0 +1,36 @@
+@using Atelier.Web.Services
+@model Atelier.Web.Areas.Admin.ViewModels.LeadDetailsViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "جزئیات درخواست";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="admin-form-card">
+        <div class="mb-4">
+            <h1 class="h5 fw-bold mb-1">جزئیات درخواست</h1>
+            <p class="text-muted mb-0">اطلاعات تماس و پیام ثبت شده.</p>
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-3 text-muted">@Html.DisplayNameFor(model => model.Name)</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3 text-muted">@Html.DisplayNameFor(model => model.Email)</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3 text-muted">@Html.DisplayNameFor(model => model.Message)</dt>
+            <dd class="col-sm-9">@(!string.IsNullOrWhiteSpace(Model.Message) ? Model.Message : "بدون پیام")</dd>
+
+            <dt class="col-sm-3 text-muted">@Html.DisplayNameFor(model => model.Status)</dt>
+            <dd class="col-sm-9">@Model.Status</dd>
+
+            <dt class="col-sm-3 text-muted">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+            <dd class="col-sm-9">@LocalizationHelper.FormatDate(Model.CreatedAt, "yyyy/MM/dd HH:mm")</dd>
+        </dl>
+
+        <div class="d-flex gap-2 mt-4">
+            <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Leads" asp-action="Index">بازگشت</a>
+        </div>
+    </div>
+</div>

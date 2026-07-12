@@ -1,0 +1,90 @@
+@model Atelier.Web.ViewModels.ProductDetailViewModel
+@{
+    const string heroSizes = "(min-width: 1200px) 540px, (min-width: 992px) 50vw, 100vw";
+    const string gallerySizes = "(min-width: 1200px) 25vw, (min-width: 992px) 33vw, 50vw";
+}
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-lg-7">
+                <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
+                <div class="fw-semibold mb-2">قیمت: @Model.PriceDisplay</div>
+                @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+                {
+                    <p class="text-muted mb-0">@Model.ShortDescription</p>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
+            {
+                <div class="col-12 col-lg-5">
+                    @{
+                        var heroSrc = ImageHelper.BuildResizedUrl(Model.HeroImageUrl, 1200) ?? Model.HeroImageUrl;
+                        var heroSrcSet = ImageHelper.BuildSrcSet(Model.HeroImageUrl, ImageHelper.HeroBreakpoints);
+                    }
+                    <div class="hero-media hero-media-inline">
+                        <img class="rounded-4 w-100" src="@heroSrc" srcset="@heroSrcSet" sizes="@heroSizes" alt="@(Model.HeroImageAltText ?? Model.Title)" loading="eager" fetchpriority="high" decoding="async" />
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-7">
+            <div class="content-card h-100">
+                <h2 class="h6 fw-bold mb-3">معرفی محصول</h2>
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p class="text-muted mb-0">@Model.Description</p>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">برای دریافت مشخصات فنی این محصول با ما تماس بگیرید.</p>
+                }
+            </div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <div class="content-card h-100">
+                <h2 class="h6 fw-bold mb-3">مشخصات فنی</h2>
+                @if (Model.Specifications.Any())
+                {
+                    <div class="spec-grid">
+                        @foreach (var spec in Model.Specifications)
+                        {
+                            <div class="spec-item">
+                                <div class="fw-semibold">@spec.Label</div>
+                                <div class="text-muted small">@spec.Value</div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">مشخصات فنی این محصول در حال تکمیل است.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Gallery.Any())
+    {
+        <section class="mt-4">
+            <div class="section-title">تصاویر محصول</div>
+            <div class="row g-3">
+                @foreach (var media in Model.Gallery)
+                {
+                    <div class="col-6 col-lg-3">
+                        @{
+                            var mediaSrc = ImageHelper.BuildResizedUrl(media.Url, 720) ?? media.Url;
+                            var mediaSrcSet = ImageHelper.BuildSrcSet(media.Url, ImageHelper.GalleryBreakpoints);
+                        }
+                        <img class="img-fluid rounded-4" src="@mediaSrc" srcset="@mediaSrcSet" sizes="@gallerySizes" alt="@(media.AltText ?? Model.Title)" loading="lazy" decoding="async" />
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>

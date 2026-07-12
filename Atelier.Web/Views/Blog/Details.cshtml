@@ -1,0 +1,29 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.BlogDetailsViewModel
+@{
+    const string heroSizes = "(min-width: 1200px) 720px, 100vw";
+}
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <article class="content-card">
+        <header class="mb-4">
+            <div class="text-muted small mb-2">@LocalizationHelper.FormatDate(Model.PublishedAt)</div>
+            <h1 class="h4 fw-bold">@Model.Title</h1>
+            <p class="text-muted mb-0">@Model.Excerpt</p>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(Model.FeaturedImageUrl))
+        {
+            <div class="mb-4">
+                @{
+                    var heroSrc = ImageHelper.BuildResizedUrl(Model.FeaturedImageUrl, 1200) ?? Model.FeaturedImageUrl;
+                    var heroSrcSet = ImageHelper.BuildSrcSet(Model.FeaturedImageUrl, ImageHelper.HeroBreakpoints);
+                }
+                <img class="img-fluid rounded-4" src="@heroSrc" srcset="@heroSrcSet" sizes="@heroSizes" alt="@Model.Title" loading="eager" fetchpriority="high" decoding="async" />
+            </div>
+        }
+
+        <section class="lh-lg">@Html.Raw(Model.Content)</section>
+    </article>
+</div>

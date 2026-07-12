@@ -1,0 +1,52 @@
+@model Atelier.Web.ViewModels.CategoryViewModel
+@{
+    const string categorySizes = "(min-width: 1200px) 480px, (min-width: 992px) 50vw, 100vw";
+}
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card mb-4 reveal">
+        <h1 class="h4 fw-bold mb-2">دسته بندی محصولات</h1>
+        <p class="text-muted mb-0">انتخاب سریع برای یافتن چوب و ترمووود مناسب پروژه شما.</p>
+    </section>
+
+    <div class="row g-4">
+        @foreach (var category in Model.Categories)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card-soft h-100 category-card hover-float reveal">
+                    <a class="text-decoration-none" href="@category.Url">
+                        <div class="category-card-media">
+                            @if (!string.IsNullOrWhiteSpace(category.ImageUrl))
+                            {
+                                var categorySrc = ImageHelper.BuildResizedUrl(category.ImageUrl, 960) ?? category.ImageUrl;
+                                var categorySrcSet = ImageHelper.BuildSrcSet(category.ImageUrl, ImageHelper.FeatureBreakpoints);
+                                <img src="@categorySrc" srcset="@categorySrcSet" sizes="@categorySizes" alt="@category.ImageAltText" loading="lazy" decoding="async" />
+                            }
+                            else
+                            {
+                                <div class="category-card-placeholder"></div>
+                            }
+                        </div>
+                        <div class="p-3 d-flex flex-column gap-1">
+                            <h2 class="h6 fw-bold mb-1">@category.Name</h2>
+                            <p class="text-muted small mb-0">@category.Summary</p>
+                        </div>
+                    </a>
+                    @if (category.Children.Any())
+                    {
+                        <div class="p-3 pt-0">
+                            <div class="d-flex flex-wrap gap-2 pill-list">
+                                @foreach (var child in category.Children)
+                                {
+                                    <a href="@child.Url">@child.Name</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

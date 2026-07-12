@@ -1,0 +1,20 @@
+@model Atelier.Web.ViewModels.PageViewModel
+
+<div class="container-xxl py-4 page-shell">
+    @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
+
+    <section class="hero-card mb-4">
+        <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
+    </section>
+
+    <div class="content-card">
+        @if (!string.IsNullOrWhiteSpace(Model.Content))
+        {
+            <div class="lh-lg">@Html.Raw(Model.Content)</div>
+        }
+        else
+        {
+            <p class="text-muted mb-0">محتوای این صفحه در حال تکمیل است.</p>
+        }
+    </div>
+</div>

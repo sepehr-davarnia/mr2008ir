@@ -1,0 +1,57 @@
+@model Atelier.Web.Areas.Admin.ViewModels.MediaUploadViewModel
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "افزودن تصویر";
+    var productName = ViewData["ProductName"] as string;
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="admin-form-card">
+                <div class="mb-4">
+                    <h1 class="h5 fw-bold mb-2">افزودن تصویر</h1>
+                    <p class="text-muted mb-0">برای محصول <span class="fw-semibold">@productName</span> یک تصویر باکیفیت انتخاب کنید.</p>
+                </div>
+
+                @if (TempData["SuccessMessage"] is string successMessage)
+                {
+                    <div class="alert alert-success admin-alert" role="alert">
+                        <i class="bi bi-check-circle"></i>
+                        <span>@successMessage</span>
+                    </div>
+                }
+
+                <form method="post" enctype="multipart/form-data" asp-area="Admin" asp-controller="Media" asp-action="Upload" data-admin-form>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ProductId" />
+
+                        <div class="mb-3">
+                            <label asp-for="File" class="form-label">انتخاب فایل</label>
+                            <input asp-for="File" class="form-control" type="file" accept="image/*,application/pdf" required />
+                            <span asp-validation-for="File" class="text-danger small"></span>
+                            <div class="form-text">حداکثر حجم مجاز: @Model.MaxUploadSizeDisplay مگابایت</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">عنوان تصویر (اختیاری)</label>
+                            <input asp-for="Title" class="form-control" placeholder="مثلاً نمای نزدیک محصول" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="AltText" class="form-label">متن جایگزین (Alt Text)</label>
+                            <input asp-for="AltText" class="form-control" placeholder="برای کمک به نمایش بهتر تصویر" />
+                            <span asp-validation-for="AltText" class="text-danger small"></span>
+                            <div class="form-text text-muted">وارد کردن متن جایگزین تصویر (Alt Text) برای سئو الزامی است.</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success admin-action-btn" data-loading-text="در حال ذخیره...">ذخیره تصویر</button>
+                            <a class="btn btn-outline-secondary admin-action-btn" asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@Model.ProductId">بازگشت</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
