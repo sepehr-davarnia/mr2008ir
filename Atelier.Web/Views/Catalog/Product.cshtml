@@ -7,7 +7,7 @@
 <div class="container-xxl py-4 page-shell">
     @await Html.PartialAsync("_Breadcrumbs", Model.Breadcrumbs)
 
-    <section class="hero-card mb-4">
+    <section class="hero-card product-hero mb-4 reveal">
         <div class="row align-items-center g-4">
             <div class="col-12 col-lg-7">
                 <h1 class="h4 fw-bold mb-2">@Model.Title</h1>
@@ -16,6 +16,8 @@
                 {
                     <p class="text-muted mb-0">@Model.ShortDescription</p>
                 }
+                <div class="product-confidence mt-4"><span>✓ ضمانت اصالت</span><span>✓ بررسی سازگاری</span><span>✓ ارسال مطمئن</span></div>
+                <a class="btn-primary-premium d-inline-flex mt-4" href="/pages/contact-us">مشاوره و سفارش <span>←</span></a>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
             {
@@ -34,7 +36,7 @@
 
     <div class="row g-4">
         <div class="col-12 col-lg-7">
-            <div class="content-card h-100">
+            <div class="content-card h-100 reveal">
                 <h2 class="h6 fw-bold mb-3">معرفی محصول</h2>
                 @if (!string.IsNullOrWhiteSpace(Model.Description))
                 {
@@ -47,7 +49,7 @@
             </div>
         </div>
         <div class="col-12 col-lg-5">
-            <div class="content-card h-100">
+            <div class="content-card h-100 reveal">
                 <h2 class="h6 fw-bold mb-3">مشخصات فنی</h2>
                 @if (Model.Specifications.Any())
                 {
