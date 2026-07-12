@@ -1,14 +1,19 @@
 :root {
-  --admin-bg: #f6f4f1;
+  --admin-bg: #f4f7fb;
   --admin-surface: #ffffff;
-  --admin-muted: #8a7f73;
-  --admin-text: #2a241f;
-  --admin-primary: #b37b4c;
-  --admin-primary-dark: #9a6539;
-  --admin-border: #e7e1da;
+  --admin-muted: #697586;
+  --admin-text: #101828;
+  --admin-primary: #176bff;
+  --admin-primary-dark: #0d4fc4;
+  --admin-border: #e3e9f2;
   --admin-shadow: 0 20px 50px rgba(32, 20, 8, 0.08);
   --admin-soft-shadow: 0 12px 24px rgba(32, 20, 8, 0.08);
 }
+
+body.admin-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 5%,rgba(23,107,255,.08),transparent 30%);z-index:-1}.admin-sidebar{position:sticky;top:0;height:100vh}.admin-brand-icon{background:linear-gradient(145deg,#176bff,#0b4ec4)!important;color:#fff!important;box-shadow:0 10px 24px rgba(23,107,255,.25)}.admin-nav-link i{color:var(--admin-primary)!important}.admin-nav-link:hover{background:rgba(23,107,255,.08)!important}.admin-nav-link.active{background:linear-gradient(90deg,rgba(23,107,255,.14),rgba(23,107,255,.05))!important;color:var(--admin-primary-dark)!important;box-shadow:inset 3px 0 0 var(--admin-primary)!important}.admin-header{backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.75)}.table{--bs-table-bg:transparent}.table thead th{color:var(--admin-muted);font-size:.75rem;text-transform:uppercase;border-bottom-color:var(--admin-border)}.table tbody tr{transition:.2s}.table tbody tr:hover{background:rgba(23,107,255,.035)}.btn-primary{background:var(--admin-primary);border-color:var(--admin-primary);box-shadow:0 8px 20px rgba(23,107,255,.18)}.form-control:focus,.form-select:focus{border-color:var(--admin-primary);box-shadow:0 0 0 .2rem rgba(23,107,255,.12)}
+@media(max-width:991px){.admin-shell{display:block!important}.admin-sidebar{position:relative;width:100%;height:auto;padding:18px}.admin-nav{display:grid;grid-template-columns:repeat(3,1fr)}.admin-main{padding:20px}.admin-header{padding:20px}.admin-nav-link{justify-content:center}.admin-nav-link span{font-size:.76rem}}
+@media(max-width:600px){.admin-nav{grid-template-columns:repeat(2,1fr)}.admin-main{padding:12px}.admin-header{align-items:flex-start}.admin-logout-button{display:none}.admin-card,.admin-form-card{padding:20px;border-radius:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.admin-content{opacity:1!important;transform:none!important}}
 
 * {
   box-sizing: border-box;
