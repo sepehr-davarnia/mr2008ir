@@ -217,8 +217,8 @@ public class HomeController : PublicControllerBase
 
         var model = new HomeViewModel
         {
-            HeroTitle = "چوب و ترمووود",
-            HeroSubtitle = "تامین و اجرای ترمووود، چوب طبیعی و سازه های فضای باز با کیفیت صادراتی.",
+            HeroTitle = "قطعات تخصصی پژو ۲۰۰۸",
+            HeroSubtitle = "خرید مطمئن قطعات اصلی و باکیفیت با بررسی فنی، ضمانت اصالت و ارسال سراسری.",
             HeroImageUrl = settings?.HomeHeroMediaId is not null && mediaMap.TryGetValue(settings.HomeHeroMediaId.Value, out var heroMedia)
                 ? heroMedia.Url
                 : null,
@@ -238,15 +238,15 @@ public class HomeController : PublicControllerBase
         };
 
         var canonicalUrl = Url.Action("Index", "Home", new { }, Request.Scheme);
-        model.MetaTitle = "آتلیه وود | تامین تخصصی ترمووود و چوب";
-        model.MetaDescription = "تامین و اجرای چوب، ترمووود، نما، کف و پرگولا با مشاوره فنی تخصصی.";
+        model.MetaTitle = "mr2008.ir | فروش تخصصی قطعات پژو ۲۰۰۸";
+        model.MetaDescription = "مرجع تخصصی خرید قطعات پژو ۲۰۰۸ با تضمین اصالت، مشاوره فنی و ارسال مطمئن به سراسر ایران.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
             Type = SeoPageSchemaType.WebPage,
-            Title = "آتلیه وود | تامین تخصصی ترمووود و چوب",
-            Description = "تامین و اجرای چوب، ترمووود، نما، کف و پرگولا با مشاوره فنی تخصصی.",
+            Title = "mr2008.ir | فروش تخصصی قطعات پژو ۲۰۰۸",
+            Description = "مرجع تخصصی خرید قطعات پژو ۲۰۰۸ با تضمین اصالت، مشاوره فنی و ارسال مطمئن به سراسر ایران.",
             CanonicalUrl = canonicalUrl ?? string.Empty
         });
 
@@ -255,7 +255,7 @@ public class HomeController : PublicControllerBase
 
     private static string BuildCategorySummary(string categoryName)
     {
-        return $"مرور محصولات و پروژه های {categoryName}.";
+        return $"قطعات منتخب {categoryName} با امکان بررسی فنی پیش از خرید.";
     }
 
     private sealed record MediaSnapshot(string Url, string? AltText);
