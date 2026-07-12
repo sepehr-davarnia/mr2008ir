@@ -66,6 +66,27 @@ public class Media : Entity
         MarkUpdated();
     }
 
+    public void AttachStoredContent(int storageId, string contentType, long fileSize, string url)
+    {
+        if (storageId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(storageId));
+        }
+
+        if (string.IsNullOrWhiteSpace(contentType) ||
+            !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Stored product media must be an image.", nameof(contentType));
+        }
+
+        StorageId = storageId;
+        ContentType = contentType;
+        FileSize = fileSize;
+        Url = url;
+        IsNotDownloaded = false;
+        MarkUpdated();
+    }
+
     public void UpdateDetails(
         string url,
         string? title,
