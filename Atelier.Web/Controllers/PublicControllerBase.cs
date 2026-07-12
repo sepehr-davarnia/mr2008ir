@@ -74,16 +74,16 @@ public abstract class PublicControllerBase : Controller
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
-        var siteName = string.IsNullOrWhiteSpace(settings?.SiteName) ? "آتلیه وود" : settings!.SiteName!;
+        var siteName = string.IsNullOrWhiteSpace(settings?.SiteName) ? "mr2008.ir" : settings!.SiteName!;
         var logoUrl = await GetMediaUrlAsync(settings?.LogoMediaId);
         var faviconUrl = await GetMediaUrlAsync(settings?.FaviconMediaId);
 
         var primaryLinks = new List<NavigationLinkViewModel>
         {
             new() { Title = "خانه", Url = Url.Action("Index", "Home") ?? "/" },
-            new() { Title = "دسته بندی ها", Url = Url.Action("Index", "Catalog") ?? "/categories" },
-            new() { Title = "پروژه ها", Url = Url.Action("Index", "Projects") ?? "/projects" },
-            new() { Title = "بلاگ", Url = Url.Action("Index", "Blog") ?? "/blog" }
+            new() { Title = "فروشگاه قطعات", Url = Url.Action("Index", "Catalog") ?? "/categories" },
+            new() { Title = "راهنمای خرید", Url = Url.Action("Index", "Blog") ?? "/blog" },
+            new() { Title = "تماس با ما", Url = "/pages/contact-us" }
         };
 
         var categoryLinks = await DbContext.Categories
@@ -114,7 +114,7 @@ public abstract class PublicControllerBase : Controller
         var layout = new LayoutViewModel
         {
             SiteName = siteName,
-            Tagline = "تامین و اجرای تخصصی چوب و ترمووود",
+            Tagline = "مرجع تخصصی قطعات پژو ۲۰۰۸",
             LogoUrl = logoUrl,
             FaviconUrl = faviconUrl,
             Address = settings?.Address,
