@@ -5,169 +5,43 @@
     var title = ViewData["MetaTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? layout.SiteName;
     var description = ViewData["MetaDescription"]?.ToString();
     var canonical = SeoHelper.BuildCanonicalUrl(Context.Request, ViewData["CanonicalUrl"]?.ToString());
-    var ogTitle = ViewData["OpenGraphTitle"]?.ToString() ?? title;
-    var ogDescription = ViewData["OpenGraphDescription"]?.ToString() ?? description;
-    var ogImage = ViewData["OpenGraphImage"]?.ToString();
-    var ogType = ViewData["OpenGraphType"]?.ToString() ?? "website";
-    var organizationSchema = ViewData["OrganizationSchema"]?.ToString();
-    var pageSchema = ViewData["PageSchema"]?.ToString();
-    var productSchema = ViewData["ProductSchema"]?.ToString();
-    var breadcrumbSchema = ViewData["BreadcrumbSchema"]?.ToString();
-    var websiteSchema = ViewData["WebsiteSchema"]?.ToString();
-    var logoSrc = ImageHelper.BuildResizedUrl(layout.LogoUrl, 320);
-    var logoSrcSet = ImageHelper.BuildSrcSet(layout.LogoUrl, ImageHelper.LogoBreakpoints);
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1018" />
     <title>@title</title>
-    @if (!string.IsNullOrWhiteSpace(description))
-    {
-        <meta name="description" content="@description" />
-    }
+    @if (!string.IsNullOrWhiteSpace(description)) { <meta name="description" content="@description" /> }
     <link rel="canonical" href="@canonical" />
-    @if (!string.IsNullOrWhiteSpace(layout.FaviconUrl))
-    {
-        <link rel="icon" href="@layout.FaviconUrl" />
-    }
-    <meta property="og:title" content="@ogTitle" />
-    @if (!string.IsNullOrWhiteSpace(ogDescription))
-    {
-        <meta property="og:description" content="@ogDescription" />
-    }
-    <meta property="og:type" content="@ogType" />
-    <meta property="og:url" content="@canonical" />
-    @if (!string.IsNullOrWhiteSpace(ogImage))
-    {
-        <meta property="og:image" content="@ogImage" />
-    }
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@ogTitle" />
-    @if (!string.IsNullOrWhiteSpace(ogDescription))
-    {
-        <meta name="twitter:description" content="@ogDescription" />
-    }
-    @if (!string.IsNullOrWhiteSpace(ogImage))
-    {
-        <meta name="twitter:image" content="@ogImage" />
-    }
-    @if (!string.IsNullOrWhiteSpace(layout.SiteName))
-    {
-        <meta property="og:site_name" content="@layout.SiteName" />
-    }
-    @if (!string.IsNullOrWhiteSpace(organizationSchema))
-    {
-        <script type="application/ld+json">@Html.Raw(organizationSchema)</script>
-    }
-    @if (!string.IsNullOrWhiteSpace(websiteSchema))
-    {
-        <script type="application/ld+json">@Html.Raw(websiteSchema)</script>
-    }
-    @if (!string.IsNullOrWhiteSpace(pageSchema))
-    {
-        <script type="application/ld+json">@Html.Raw(pageSchema)</script>
-    }
-    @if (!string.IsNullOrWhiteSpace(productSchema))
-    {
-        <script type="application/ld+json">@Html.Raw(productSchema)</script>
-    }
-    @if (!string.IsNullOrWhiteSpace(breadcrumbSchema))
-    {
-        <script type="application/ld+json">@Html.Raw(breadcrumbSchema)</script>
-    }
+    <meta property="og:title" content="@title" /><meta property="og:type" content="website" /><meta property="og:url" content="@canonical" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-<header class="site-header">
-    <div class="container-xxl site-header__inner d-flex align-items-center justify-content-between gap-3">
-        <div class="site-header__brand d-flex align-items-center gap-3">
-            <a class="d-flex align-items-center gap-3 text-decoration-none" href="/">
-                @if (!string.IsNullOrWhiteSpace(layout.LogoUrl))
-                {
-                    <img src="@(logoSrc ?? layout.LogoUrl)" srcset="@logoSrcSet" sizes="120px" alt="@layout.SiteName" class="site-logo" loading="eager" fetchpriority="high" decoding="async" />
-                }
-                <div class="site-header__brand-text">
-                    <div class="fw-bold fs-4">@layout.SiteName</div>
-                    <div class="text-muted small">@layout.Tagline</div>
-                </div>
-            </a>
-        </div>
-        <nav class="d-flex align-items-center gap-2 primary-nav">
-            @foreach (var link in layout.PrimaryLinks)
-            {
-                <a class="nav-link fw-semibold" href="@link.Url">@link.Title</a>
-            }
-            <a class="btn btn-dark btn-sm" href="/pages/contact-us">مشاوره تخصصی</a>
+<div class="announcement">ارسال مطمئن به سراسر ایران <span>•</span> مشاوره تخصصی رایگان پیش از خرید</div>
+<header class="site-header" data-header>
+    <div class="container-xxl site-header__inner">
+        <a class="wordmark" href="/" aria-label="صفحه اصلی mr2008.ir"><span>MR</span><b>2008</b><small>.IR</small></a>
+        <nav class="primary-nav" aria-label="منوی اصلی">
+            <a href="/categories">فروشگاه قطعات</a><a href="/categories/engine-parts">قطعات موتور</a><a href="/categories/consumables">لوازم مصرفی</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a>
         </nav>
+        <div class="header-actions"><a class="header-search" href="/categories" aria-label="جست‌وجو">⌕</a><a class="header-consult" href="/pages/contact-us">مشاوره خرید</a><button class="nav-toggle" type="button" aria-label="نمایش منو" aria-expanded="false">☰</button></div>
     </div>
 </header>
-
-<main class="site-main">
-    @RenderBody()
-</main>
-
+<main class="site-main">@RenderBody()</main>
 <footer class="site-footer">
-    <div class="container-xxl">
-        <div class="row g-4 align-items-start">
-            <div class="col-12 col-lg-5">
-                <div class="fw-bold fs-5 mb-2">@layout.SiteName</div>
-                <p class="text-muted mb-3">@layout.Tagline</p>
-                <p class="footer-quote mb-3">چوب، وقتی درست انتخاب و اجرا شود، سال‌ها زندگی می‌کند.</p>
-                @if (!string.IsNullOrWhiteSpace(layout.Address))
-                {
-                    <div class="text-muted small mb-2">@layout.Address</div>
-                }
-                @if (!string.IsNullOrWhiteSpace(layout.Phone))
-                {
-                    <div class="text-muted small">تلفن: @layout.Phone</div>
-                }
-                @if (!string.IsNullOrWhiteSpace(layout.Email))
-                {
-                    <div class="text-muted small">ایمیل: @layout.Email</div>
-                }
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="fw-semibold mb-2">دسته بندی ها</div>
-                <ul class="list-unstyled small">
-                    @foreach (var link in layout.CategoryLinks)
-                    {
-                        <li class="mb-2"><a class="text-decoration-none text-muted" href="@link.Url">@link.Title</a></li>
-                    }
-                </ul>
-            </div>
-            <div class="col-6 col-lg-2">
-                <div class="fw-semibold mb-2">صفحات</div>
-                <ul class="list-unstyled small">
-                    <li class="mb-2"><a class="text-decoration-none text-muted" href="/pages/about-us">درباره ما</a></li>
-                    <li class="mb-2"><a class="text-decoration-none text-muted" href="/pages/services">خدمات</a></li>
-                    <li class="mb-2"><a class="text-decoration-none text-muted" href="/pages/contact-us">تماس با ما</a></li>
-                    <li class="mb-2"><a class="text-decoration-none text-muted" href="/pages/thermowood-guide">راهنمای ترمووود</a></li>
-                    <li class="mb-2"><a class="text-decoration-none text-muted" href="/pages/faq">سوالات متداول</a></li>
-                </ul>
-            </div>
-            <div class="col-12 col-lg-2">
-                <div class="fw-semibold mb-2">شبکه های اجتماعی</div>
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var link in layout.SocialLinks)
-                    {
-                        <a class="text-decoration-none text-muted small" href="@link.Url" target="_blank" rel="noopener noreferrer">@link.Title</a>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="border-top mt-4 pt-3 footer-bottom small">
-            © @DateTime.Now.Year @layout.SiteName - کلیه حقوق محفوظ است.
-        </div>
+    <div class="container-xxl footer-grid">
+        <div><a class="wordmark wordmark--footer" href="/"><span>MR</span><b>2008</b><small>.IR</small></a><p>مرجع تخصصی انتخاب و خرید قطعات پژو ۲۰۰۸؛ با تمرکز بر اصالت، مشاوره فنی و تجربه خرید مطمئن.</p></div>
+        <div><h3>دسترسی سریع</h3><a href="/categories">فروشگاه</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a></div>
+        <div><h3>خدمات مشتریان</h3><a href="/pages/contact-us">تماس با ما</a><a href="/pages/faq">سؤالات متداول</a><a href="/pages/contact-us">استعلام قطعه</a></div>
+        <div><h3>اطلاعات تماس</h3><span>@layout.Phone</span><span>@layout.Email</span><span>@layout.Address</span></div>
     </div>
+    <div class="container-xxl footer-bottom"><span>© @DateTime.Now.Year mr2008.ir</span><span>انتخاب مطمئن برای پژو ۲۰۰۸</span></div>
 </footer>
-
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
-</body>
-</html>
+@await RenderSectionAsync("Scripts", required: false)
+</body></html>
