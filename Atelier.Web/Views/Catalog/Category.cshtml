@@ -99,8 +99,7 @@
                                     <p class="text-muted small flex-grow-1 mb-0">جزئیات این محصول به زودی تکمیل می‌شود.</p>
                                 }
                                 <div class="fw-semibold">@product.PriceDisplay</div>
-                                <a class="btn btn-outline-dark btn-sm mt-auto" href="@product.Url">جزئیات محصول</a>
-                                <a class="stretched-link" href="@product.Url" aria-label="@product.Name"></a>
+                                <div class="product-card-actions mt-auto"><a class="btn btn-outline-dark btn-sm" href="@product.Url">جزئیات محصول</a>@if (product.CanPurchaseOnline) { <form method="post" action="/cart/add" data-cart-add>@Html.AntiForgeryToken()<input type="hidden" name="productId" value="@product.Id" /><input type="hidden" name="returnUrl" value="@Context.Request.Path" /><button class="btn btn-primary btn-sm" type="submit"><span>افزودن به سبد</span></button></form> }</div>
                             </div>
                         </div>
                     </div>

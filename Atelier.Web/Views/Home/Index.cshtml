@@ -78,7 +78,7 @@
                         }
                         <span class="auth-badge">ضمانت اصالت</span>
                     </a>
-                    <div class="premium-product-card__body"><small>مناسب پژو ۲۰۰۸</small><h3><a href="@product.Url">@product.Name</a></h3><div><b>@product.PriceDisplay</b><a href="@product.Url" aria-label="مشاهده محصول">←</a></div></div>
+                    <div class="premium-product-card__body"><small>مناسب پژو ۲۰۰۸</small><h3><a href="@product.Url">@product.Name</a></h3><div><b>@product.PriceDisplay</b>@if (product.CanPurchaseOnline) { <form method="post" action="/cart/add" data-cart-add>@Html.AntiForgeryToken()<input type="hidden" name="productId" value="@product.Id" /><input type="hidden" name="returnUrl" value="/" /><button class="quick-cart" type="submit" aria-label="افزودن @product.Name به سبد"><span>＋</span></button></form> } else { <a href="@product.Url" aria-label="مشاهده محصول">←</a> }</div></div>
                 </article>
             }
         </div>

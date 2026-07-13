@@ -2,6 +2,12 @@
 @{
     const string heroSizes = "(min-width: 1200px) 540px, (min-width: 992px) 50vw, 100vw";
     const string gallerySizes = "(min-width: 1200px) 25vw, (min-width: 992px) 33vw, 50vw";
+    var layout = ViewData["Layout"] as Atelier.Web.ViewModels.LayoutViewModel ?? new Atelier.Web.ViewModels.LayoutViewModel();
+    var phoneHref = string.IsNullOrWhiteSpace(layout.Phone) ? null : "tel:" + new string(layout.Phone.Where(c => char.IsDigit(c) || c == '+').ToArray());
+    var whatsappValue = layout.WhatsApp?.Trim();
+    var whatsappHref = string.IsNullOrWhiteSpace(whatsappValue) ? null :
+        (whatsappValue.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? whatsappValue :
+        "https://wa.me/" + new string(whatsappValue.Where(char.IsDigit).ToArray()) + "?text=" + Uri.EscapeDataString($"برای خرید {Model.Title} راهنمایی می‌خواهم."));
 }
 
 <div class="container-xxl py-4 page-shell">
@@ -17,7 +23,21 @@
                     <p class="text-muted mb-0">@Model.ShortDescription</p>
                 }
                 <div class="product-confidence mt-4"><span>✓ ضمانت اصالت</span><span>✓ بررسی سازگاری</span><span>✓ ارسال مطمئن</span></div>
-                <a class="btn-primary-premium d-inline-flex mt-4" href="/pages/contact-us">مشاوره و سفارش <span>←</span></a>
+                @if (TempData["CallSuccess"] is string callSuccess) { <div class="commerce-alert mt-3" role="status">✓ @callSuccess</div> }
+                @if (TempData["CallError"] is string callError) { <div class="commerce-alert commerce-alert--error mt-3" role="alert">@callError</div> }
+                <div class="product-purchase mt-4">
+                    @if (Model.CanPurchaseOnline)
+                    {
+                        <form method="post" action="/cart/add" data-cart-add>
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <button class="purchase-primary" type="submit"><span>افزودن به سبد خرید</span><small>خرید آنلاین و ثبت امن سفارش</small></button>
+                        </form>
+                    }
+                    <button class="purchase-call" type="button" data-call-sheet-open><span>تماس برای خرید</span><small>مشاوره فوری با کارشناس قطعه</small></button>
+                </div>
+                <p class="purchase-microcopy">پرداخت پس از تأیید موجودی و سازگاری قطعه انجام می‌شود.</p>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
             {
@@ -90,3 +110,24 @@
         </section>
     }
 </div>
+
+<dialog class="call-sheet" data-call-sheet aria-labelledby="call-sheet-title">
+    <button class="call-sheet__close" type="button" data-call-sheet-close aria-label="بستن">×</button>
+    <span class="eyebrow">خرید با کمک کارشناس</span>
+    <h2 id="call-sheet-title">برای خرید @Model.Title</h2>
+    <p>همین حالا تماس بگیرید یا شماره‌تان را بگذارید تا کارشناس با شما تماس بگیرد.</p>
+    <div class="call-sheet__direct">
+        @if (phoneHref is not null) { <a class="purchase-primary" href="@phoneHref">تماس مستقیم <b dir="ltr">@layout.Phone</b></a> }
+        @if (whatsappHref is not null) { <a class="purchase-whatsapp" href="@whatsappHref" target="_blank" rel="noopener">پیام در واتساپ</a> }
+    </div>
+    <div class="call-sheet__divider"><span>یا درخواست تماس ثبت کنید</span></div>
+    <form method="post" action="/call-to-buy" class="call-form">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ProductId" value="@Model.Id" />
+        <input type="hidden" name="ReturnUrl" value="@Context.Request.Path" />
+        <label><span>نام</span><input name="Name" required maxlength="120" autocomplete="name" /></label>
+        <label><span>شماره موبایل</span><input name="Phone" required inputmode="tel" autocomplete="tel" dir="ltr" placeholder="0912 123 4567" /></label>
+        <label><span>توضیح کوتاه <small>(اختیاری)</small></span><textarea name="Note" maxlength="300" rows="2" placeholder="مثلاً مدل خودرو یا کد فنی"></textarea></label>
+        <button class="checkout-button" type="submit">درخواست تماس رایگان</button>
+    </form>
+</dialog>

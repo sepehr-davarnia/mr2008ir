@@ -31,7 +31,7 @@
                     {
                         <div class="col-12 col-md-6 col-lg-4"><article class="card-soft product-card h-100">
                             @if (!string.IsNullOrWhiteSpace(product.ImageUrl)) { <div class="product-card-media"><img src="@product.ImageUrl" alt="@product.ImageAltText" loading="lazy" /></div> }
-                            <div class="p-3"><h2 class="h6 fw-bold">@product.Name</h2><p class="text-muted small">@product.ShortDescription</p><div class="fw-semibold mb-3">@product.PriceDisplay</div><a class="btn btn-dark btn-sm" href="@product.Url">مشاهده محصول</a></div>
+                            <div class="p-3"><h2 class="h6 fw-bold">@product.Name</h2><p class="text-muted small">@product.ShortDescription</p><div class="fw-semibold mb-3">@product.PriceDisplay</div><div class="product-card-actions"><a class="btn btn-dark btn-sm" href="@product.Url">مشاهده محصول</a>@if (product.CanPurchaseOnline) { <form method="post" action="/cart/add" data-cart-add>@Html.AntiForgeryToken()<input type="hidden" name="productId" value="@product.Id" /><input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" /><button class="btn btn-primary btn-sm" type="submit"><span>افزودن به سبد</span></button></form> }</div></div>
                         </article></div>
                     }
                 </div>

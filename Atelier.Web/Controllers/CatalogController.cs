@@ -59,12 +59,14 @@ public class CatalogController : PublicControllerBase
                 var chain = CatalogRoutingHelper.BuildCategoryChain(categories, category);
                 searchResults.Add(new ProductCardViewModel
                 {
+                    Id = product.Id,
                     Name = product.Name,
                     Url = CatalogRoutingHelper.BuildProductPath(chain, product.Slug),
                     ShortDescription = SeoContentHelper.BuildShortDescription(SeoContentHelper.ExtractDescription(product.Description)),
                     ImageUrl = product.PrimaryMedia?.Url,
                     ImageAltText = product.PrimaryMedia?.AltText ?? product.Name,
-                    PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType)
+                    PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType),
+                    CanPurchaseOnline = product.PriceType == PriceType.Fixed && product.Price > 0
                 });
             }
         }
@@ -175,6 +177,7 @@ public class CatalogController : PublicControllerBase
                     Slug = product.Slug,
                     Description = product.Description,
                     Price = product.Price,
+                    PriceType = product.PriceType,
                     PrimaryMedia = product.Gallery
                         .OrderBy(media => media.Id)
                         .Select(media => new MediaSnapshot(media.Url, media.AltText))
@@ -184,12 +187,14 @@ public class CatalogController : PublicControllerBase
 
         var products = productData.Select(product => new ProductCardViewModel
         {
+            Id = product.Id,
             Name = product.Name,
             Url = BuildProductUrl(categoryChain, product.Slug),
             ShortDescription = SeoContentHelper.BuildShortDescription(SeoContentHelper.ExtractDescription(product.Description)),
             ImageUrl = product.PrimaryMedia?.Url,
             ImageAltText = product.PrimaryMedia?.AltText ?? product.Name,
-            PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType)
+            PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType),
+            CanPurchaseOnline = product.PriceType == PriceType.Fixed && product.Price > 0
         }).ToList();
 
         var breadcrumbs = BuildBreadcrumbs(categoryChain);
@@ -244,10 +249,12 @@ public class CatalogController : PublicControllerBase
 
         var model = new ProductDetailViewModel
         {
+            Id = product.Id,
             Title = product.Name,
             Description = description,
             ShortDescription = SeoContentHelper.BuildShortDescription(description),
             PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType),
+            CanPurchaseOnline = product.PriceType == PriceType.Fixed && product.Price > 0,
             HeroImageUrl = heroMedia?.Url,
             HeroImageAltText = heroMedia?.AltText ?? product.Name,
             Breadcrumbs = breadcrumbs,

@@ -51,6 +51,7 @@ public class HomeController : PublicControllerBase
             .Take(8)
             .Select(product => new
             {
+                product.Id,
                 product.Name,
                 product.Slug,
                 product.Description,
@@ -78,12 +79,14 @@ public class HomeController : PublicControllerBase
 
             return new ProductCardViewModel
             {
+                Id = product.Id,
                 Name = product.Name,
                 Url = productUrl,
                 ShortDescription = SeoContentHelper.BuildShortDescription(SeoContentHelper.ExtractDescription(product.Description)),
                 ImageUrl = product.PrimaryMedia?.Url,
                 ImageAltText = product.PrimaryMedia?.AltText ?? product.Name,
-                PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType)
+                PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType),
+                CanPurchaseOnline = product.PriceType == PriceType.Fixed && product.Price > 0
             };
         }).ToList();
 

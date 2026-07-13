@@ -38,6 +38,10 @@
                     <i class="bi bi-box-seam"></i>
                     <span>محصولات</span>
                 </a>
+                <a class="admin-nav-link @(currentController == "Orders" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                    <i class="bi bi-bag-check"></i>
+                    <span>سفارش‌ها</span>
+                </a>
                 <a class="admin-nav-link @(currentController == "Products" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Products" asp-action="Pricing">
                     <i class="bi bi-cash-coin"></i>
                     <span>مدیریت قیمت‌ها</span>

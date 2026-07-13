@@ -1,0 +1,18 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.OrderConfirmationViewModel
+@{
+    ViewData["Title"] = "سفارش ثبت شد";
+}
+
+<div class="container-xxl commerce-shell">
+    <section class="order-success reveal">
+        <div class="success-check" aria-hidden="true">✓</div>
+        <span class="eyebrow">سفارش دریافت شد</span>
+        <h1>متشکریم؛ سفارش شما ثبت شد.</h1>
+        <p>کارشناس mr2008.ir برای بررسی سازگاری، موجودی و هزینه ارسال با شماره <b dir="ltr">@Model.Phone</b> تماس می‌گیرد.</p>
+        <div class="order-reference"><span>شماره پیگیری</span><strong dir="ltr">@Model.OrderNumber</strong><button type="button" data-copy="@Model.OrderNumber">کپی</button></div>
+        <p class="order-success__total">جمع کالاها: <strong>@LocalizationHelper.FormatPrice(Model.Total, Atelier.Domain.Enums.PriceType.Fixed)</strong></p>
+        <div class="success-steps"><div><b>۱</b><span>بررسی فنی قطعه</span></div><div><b>۲</b><span>تأیید موجودی و ارسال</span></div><div><b>۳</b><span>ارسال لینک پرداخت امن</span></div></div>
+        <div class="success-actions"><a class="btn-primary-premium" href="/categories">ادامه خرید</a><a class="commerce-link" href="/pages/contact-us">نیاز به راهنمایی دارم</a></div>
+    </section>
+</div>

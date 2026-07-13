@@ -1,0 +1,38 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "تکمیل سفارش";
+}
+
+<div class="container-xxl commerce-shell checkout-shell">
+    <div class="commerce-heading reveal"><span class="eyebrow">مرحله نهایی</span><h1>اطلاعات ارسال</h1><p>اطلاعات شما فقط برای پیگیری و ارسال همین سفارش استفاده می‌شود.</p></div>
+    <div class="checkout-progress" aria-label="مراحل خرید"><span class="done">۱. سبد خرید</span><span class="active">۲. اطلاعات ارسال</span><span>۳. تأیید سفارش</span></div>
+
+    <form method="post" action="/checkout" class="commerce-grid checkout-grid">
+        @Html.AntiForgeryToken()
+        <section class="checkout-form reveal">
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div class="form-section-title"><span>۱</span><div><h2>مشخصات تحویل‌گیرنده</h2><p>برای هماهنگی سفارش با شما تماس می‌گیریم.</p></div></div>
+            <div class="checkout-fields">
+                <label><span>@Html.DisplayNameFor(item => item.CustomerName)</span><input asp-for="CustomerName" autocomplete="name" /><small asp-validation-for="CustomerName"></small></label>
+                <label><span>@Html.DisplayNameFor(item => item.Phone)</span><input asp-for="Phone" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="0912 123 4567" /><small asp-validation-for="Phone"></small></label>
+                <label><span>@Html.DisplayNameFor(item => item.Province)</span><input asp-for="Province" autocomplete="address-level1" /><small asp-validation-for="Province"></small></label>
+                <label><span>@Html.DisplayNameFor(item => item.City)</span><input asp-for="City" autocomplete="address-level2" /><small asp-validation-for="City"></small></label>
+                <label class="field-wide"><span>@Html.DisplayNameFor(item => item.Address)</span><textarea asp-for="Address" rows="3" autocomplete="street-address"></textarea><small asp-validation-for="Address"></small></label>
+                <label><span>@Html.DisplayNameFor(item => item.PostalCode)</span><input asp-for="PostalCode" inputmode="numeric" autocomplete="postal-code" dir="ltr" maxlength="10" /><small asp-validation-for="PostalCode"></small></label>
+                <label class="field-wide"><span>@Html.DisplayNameFor(item => item.CustomerNote)</span><textarea asp-for="CustomerNote" rows="2" placeholder="مثلاً زمان مناسب تماس یا توضیح درباره قطعه"></textarea><small asp-validation-for="CustomerNote"></small></label>
+            </div>
+            <div class="purchase-policy"><b>پرداخت امن پس از تأیید</b><p>برای جلوگیری از خرید قطعه ناسازگار، کارشناس ابتدا کد فنی، موجودی و هزینه ارسال را تأیید می‌کند؛ سپس لینک پرداخت امن برای شما ارسال می‌شود.</p></div>
+        </section>
+        <aside class="order-summary reveal">
+            <h2>سفارش شما</h2>
+            @foreach (var item in Model.Cart.Items)
+            {
+                <div class="checkout-line"><span>@item.Name <small>× @item.Quantity</small></span><b>@LocalizationHelper.FormatPrice(item.LineTotal, Atelier.Domain.Enums.PriceType.Fixed)</b></div>
+            }
+            <div class="order-summary__total"><span>جمع کالاها</span><strong>@LocalizationHelper.FormatPrice(Model.Cart.Total, Atelier.Domain.Enums.PriceType.Fixed)</strong></div>
+            <button class="checkout-button" type="submit">ثبت امن سفارش <span>←</span></button>
+            <p class="checkout-consent">با ثبت سفارش، <a href="/pages/terms" target="_blank">شرایط خرید</a> و تماس جهت تأیید فنی و موجودی را می‌پذیرید.</p>
+        </aside>
+    </form>
+</div>

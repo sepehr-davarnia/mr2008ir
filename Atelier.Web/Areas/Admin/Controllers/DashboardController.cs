@@ -1,4 +1,4 @@
-﻿using Atelier.Domain.Enums;
+using Atelier.Domain.Enums;
 using Atelier.Infrastructure.Data;
 using Atelier.Web.Areas.Admin.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +25,9 @@ public class DashboardController : AdminController
             ProjectsCount = await _dbContext.Projects.CountAsync(),
             PublishedProjectsCount = await _dbContext.Projects.CountAsync(project => project.IsPublished),
             LeadsCount = await _dbContext.Leads.CountAsync(),
-            BlogPostsCount = await _dbContext.BlogPosts.CountAsync(post => post.PublishedAt != null)
+            BlogPostsCount = await _dbContext.BlogPosts.CountAsync(post => post.PublishedAt != null),
+            OrdersCount = await _dbContext.Orders.CountAsync(),
+            AwaitingOrdersCount = await _dbContext.Orders.CountAsync(order => order.Status == OrderStatus.AwaitingReview)
         };
 
         return View(model);

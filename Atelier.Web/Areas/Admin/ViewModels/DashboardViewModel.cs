@@ -9,4 +9,6 @@ public class DashboardViewModel
     public int PublishedProjectsCount { get; set; }
     public int LeadsCount { get; set; }
     public int BlogPostsCount { get; set; }
+    public int OrdersCount { get; set; }
+    public int AwaitingOrdersCount { get; set; }
 }

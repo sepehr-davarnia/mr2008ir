@@ -46,10 +46,12 @@ public class ProductListViewModel
 
 public class ProductDetailViewModel
 {
+    public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
     public string PriceDisplay { get; set; } = string.Empty;
+    public bool CanPurchaseOnline { get; set; }
     public string? HeroImageUrl { get; set; }
     public string? HeroImageAltText { get; set; }
     public IReadOnlyList<BreadcrumbItemViewModel> Breadcrumbs { get; set; } = new List<BreadcrumbItemViewModel>();
@@ -81,12 +83,14 @@ public class CategoryCardViewModel
 
 public class ProductCardViewModel
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string? ShortDescription { get; set; }
     public string? ImageUrl { get; set; }
     public string? ImageAltText { get; set; }
     public string PriceDisplay { get; set; } = string.Empty;
+    public bool CanPurchaseOnline { get; set; }
 }
 
 public class ProductSpecificationViewModel

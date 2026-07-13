@@ -21,6 +21,51 @@
     toggle?.focus();
   });
 
+  const callSheet = document.querySelector('[data-call-sheet]');
+  document.querySelector('[data-call-sheet-open]')?.addEventListener('click', () => {
+    if (typeof callSheet?.showModal === 'function') callSheet.showModal();
+    else callSheet?.setAttribute('open', '');
+  });
+  document.querySelector('[data-call-sheet-close]')?.addEventListener('click', () => callSheet?.close());
+  callSheet?.addEventListener('click', event => {
+    if (event.target === callSheet) callSheet.close();
+  });
+
+  const toast = document.querySelector('[data-cart-toast]');
+  const announceCart = message => {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+    window.setTimeout(() => toast.classList.remove('is-visible'), 3200);
+  };
+  document.querySelectorAll('[data-cart-add]').forEach(form => form.addEventListener('submit', async event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const button = form.querySelector('button[type="submit"]');
+    if (button) { button.disabled = true; button.classList.add('is-loading'); }
+    try {
+      const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error('cart');
+      const result = await response.json();
+      const count = document.querySelector('[data-cart-count]');
+      if (count) { count.textContent = result.count; count.hidden = false; count.classList.remove('d-none'); }
+      announceCart(result.message);
+      button?.classList.add('is-added');
+      const label = button?.querySelector('span');
+      if (label) label.textContent = button.classList.contains('quick-cart') ? '✓' : 'به سبد اضافه شد ✓';
+    } catch {
+      form.submit();
+    } finally {
+      if (button) { button.disabled = false; button.classList.remove('is-loading'); }
+    }
+  }));
+
+  document.querySelector('[data-copy]')?.addEventListener('click', async event => {
+    const button = event.currentTarget;
+    await navigator.clipboard?.writeText(button.dataset.copy);
+    button.textContent = 'کپی شد ✓';
+  });
+
   if (reduced) return document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
   const observer = new IntersectionObserver(entries => entries.forEach(entry => {
     if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
