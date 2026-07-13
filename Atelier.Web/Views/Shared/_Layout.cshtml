@@ -12,6 +12,7 @@
     var pageSchema = ViewData["PageSchema"]?.ToString();
     var productSchema = ViewData["ProductSchema"]?.ToString();
     var breadcrumbSchema = ViewData["BreadcrumbSchema"]?.ToString();
+    var robots = ViewData["Robots"]?.ToString() ?? "index,follow,max-image-preview:large";
 }
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -19,6 +20,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b1018" />
+    <meta name="robots" content="@robots" />
     <title>@title</title>
     @if (!string.IsNullOrWhiteSpace(description)) { <meta name="description" content="@description" /> }
     <link rel="canonical" href="@canonical" />
@@ -37,17 +39,18 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+<a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
 <div class="announcement">ارسال مطمئن به سراسر ایران <span>•</span> مشاوره تخصصی رایگان پیش از خرید</div>
 <header class="site-header" data-header>
     <div class="container-xxl site-header__inner">
         <a class="wordmark" href="/" aria-label="صفحه اصلی mr2008.ir"><span>MR</span><b>2008</b><small>.IR</small></a>
-        <nav class="primary-nav" aria-label="منوی اصلی">
-            <a href="/categories">فروشگاه قطعات</a><a href="/categories/engine-parts">قطعات موتور</a><a href="/categories/consumables">لوازم مصرفی</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a>
+        <nav class="primary-nav" id="primary-navigation" aria-label="منوی اصلی">
+            <a href="/categories">فروشگاه قطعات</a><a href="/engine-parts">قطعات موتور</a><a href="/filters-consumables">لوازم مصرفی</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a>
         </nav>
-        <div class="header-actions"><a class="header-search" href="/categories" aria-label="جست‌وجو">⌕</a><a class="header-consult" href="/pages/contact-us">مشاوره خرید</a><button class="nav-toggle" type="button" aria-label="نمایش منو" aria-expanded="false">☰</button></div>
+        <div class="header-actions"><a class="header-search" href="/categories#catalogQuery" aria-label="جست‌وجو">⌕</a><a class="header-consult" href="/pages/contact-us">مشاوره خرید</a><button class="nav-toggle" type="button" aria-label="نمایش منو" aria-controls="primary-navigation" aria-expanded="false">☰</button></div>
     </div>
 </header>
-<main class="site-main">@RenderBody()</main>
+<main class="site-main" id="main-content">@RenderBody()</main>
 <footer class="site-footer">
     <div class="container-xxl footer-grid">
         <div><a class="wordmark wordmark--footer" href="/"><span>MR</span><b>2008</b><small>.IR</small></a><p>مرجع تخصصی انتخاب و خرید قطعات پژو ۲۰۰۸؛ با تمرکز بر اصالت، مشاوره فنی و تجربه خرید مطمئن.</p></div>
