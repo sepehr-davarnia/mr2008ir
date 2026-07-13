@@ -23,7 +23,7 @@ public class CatalogController : PublicControllerBase
     }
 
     [HttpGet("categories")]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? q)
     {
         var categories = await LoadCategoryNodesAsync();
         var (mediaMap, fallbackMedia) = await LoadCategoryMediaAsync(categories);
@@ -35,10 +35,46 @@ public class CatalogController : PublicControllerBase
             new() { Title = "دسته بندی ها" }
         };
 
+        var query = string.IsNullOrWhiteSpace(q) ? null : q.Trim()[..Math.Min(q.Trim().Length, 100)];
+        var searchResults = new List<ProductCardViewModel>();
+        if (query is not null)
+        {
+            var matches = await DbContext.Products.AsNoTracking()
+                .Where(product => product.Status == ProductStatus.Published &&
+                    (product.Name.Contains(query) || (product.Description != null && product.Description.Contains(query))))
+                .OrderBy(product => product.Name).Take(30)
+                .Select(product => new ProductSnapshot
+                {
+                    Id = product.Id, Name = product.Name, Slug = product.Slug,
+                    Description = product.Description, Price = product.Price, PriceType = product.PriceType,
+                    PrimaryMedia = product.Gallery.OrderBy(media => media.Id)
+                        .Select(media => new MediaSnapshot(media.Url, media.AltText)).FirstOrDefault()
+                }).ToListAsync();
+
+            foreach (var product in matches)
+            {
+                if (!CatalogRoutingHelper.TryGetPrimaryCategorySlug(product.Slug, out var categorySlug)) continue;
+                var category = categories.FirstOrDefault(item => item.Slug == categorySlug);
+                if (category is null) continue;
+                var chain = CatalogRoutingHelper.BuildCategoryChain(categories, category);
+                searchResults.Add(new ProductCardViewModel
+                {
+                    Name = product.Name,
+                    Url = CatalogRoutingHelper.BuildProductPath(chain, product.Slug),
+                    ShortDescription = SeoContentHelper.BuildShortDescription(SeoContentHelper.ExtractDescription(product.Description)),
+                    ImageUrl = product.PrimaryMedia?.Url,
+                    ImageAltText = product.PrimaryMedia?.AltText ?? product.Name,
+                    PriceDisplay = LocalizationHelper.FormatPrice(product.Price, product.PriceType)
+                });
+            }
+        }
+
         var model = new CategoryViewModel
         {
             Categories = tree,
-            Breadcrumbs = breadcrumbs
+            Breadcrumbs = breadcrumbs,
+            Query = query,
+            SearchResults = searchResults
         };
 
         var canonicalUrl = Url.Action("Index", "Catalog", new { }, Request.Scheme);
@@ -46,6 +82,7 @@ public class CatalogController : PublicControllerBase
         model.MetaDescription = "خرید قطعات موتور، ترمز، تعلیق، بدنه، برق و لوازم مصرفی پژو ۲۰۰۸.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
+        if (query is not null) ViewData["Robots"] = "noindex,follow";
         SetBreadcrumbSchema(breadcrumbs);
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
@@ -229,7 +266,7 @@ public class CatalogController : PublicControllerBase
             Description = SeoContentHelper.BuildMetaDescription(description),
             CanonicalUrl = canonicalUrl,
             ImageUrl = gallery.FirstOrDefault()?.Url,
-            Price = product.Price,
+            Price = product.Price.HasValue ? product.Price.Value * 10 : null,
             CurrencyCode = "IRR"
         });
 
