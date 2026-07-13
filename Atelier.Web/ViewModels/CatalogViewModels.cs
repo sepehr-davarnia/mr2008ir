@@ -24,6 +24,13 @@ public class CategoryViewModel
     public IReadOnlyList<BreadcrumbItemViewModel> Breadcrumbs { get; set; } = new List<BreadcrumbItemViewModel>();
     public IReadOnlyList<CategoryTreeItemViewModel> Categories { get; set; } = new List<CategoryTreeItemViewModel>();
     public string? Query { get; set; }
+    public int? VehicleYear { get; set; }
+    public string? Engine { get; set; }
+    public string? Trim { get; set; }
+    public IReadOnlyList<int> YearOptions { get; set; } = Array.Empty<int>();
+    public IReadOnlyList<string> EngineOptions { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<string> TrimOptions { get; set; } = Array.Empty<string>();
+    public bool HasDiscoveryFilter => !string.IsNullOrWhiteSpace(Query) || VehicleYear.HasValue || !string.IsNullOrWhiteSpace(Engine) || !string.IsNullOrWhiteSpace(Trim);
     public IReadOnlyList<ProductCardViewModel> SearchResults { get; set; } = new List<ProductCardViewModel>();
     public string MetaTitle { get; set; } = string.Empty;
     public string MetaDescription { get; set; } = string.Empty;
@@ -52,6 +59,12 @@ public class ProductDetailViewModel
     public string? ShortDescription { get; set; }
     public string PriceDisplay { get; set; } = string.Empty;
     public bool CanPurchaseOnline { get; set; }
+    public string? Brand { get; set; }
+    public string? Manufacturer { get; set; }
+    public string? OemPartNumber { get; set; }
+    public string? TechnicalPartNumber { get; set; }
+    public string? AlternatePartNumbers { get; set; }
+    public IReadOnlyList<VehicleCompatibilityViewModel> CompatibleVehicles { get; set; } = Array.Empty<VehicleCompatibilityViewModel>();
     public string? HeroImageUrl { get; set; }
     public string? HeroImageAltText { get; set; }
     public IReadOnlyList<BreadcrumbItemViewModel> Breadcrumbs { get; set; } = new List<BreadcrumbItemViewModel>();
@@ -60,6 +73,18 @@ public class ProductDetailViewModel
     public string MetaTitle { get; set; } = string.Empty;
     public string MetaDescription { get; set; } = string.Empty;
     public string CanonicalUrl { get; set; } = string.Empty;
+}
+
+public class VehicleCompatibilityViewModel
+{
+    public string Make { get; set; } = string.Empty;
+    public string Model { get; set; } = string.Empty;
+    public int YearFrom { get; set; }
+    public int? YearTo { get; set; }
+    public string Engine { get; set; } = string.Empty;
+    public string Trim { get; set; } = string.Empty;
+    public bool RequiresVinCheck { get; set; }
+    public string? Note { get; set; }
 }
 
 public class CategoryTreeItemViewModel

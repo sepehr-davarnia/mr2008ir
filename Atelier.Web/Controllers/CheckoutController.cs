@@ -12,11 +12,13 @@ public class CheckoutController : PublicControllerBase
 {
     private readonly ICartService _cart;
     private readonly ICartViewModelBuilder _cartBuilder;
+    private readonly IPaymentGateway _paymentGateway;
 
-    public CheckoutController(AtelierDbContext dbContext, ICartService cart, ICartViewModelBuilder cartBuilder) : base(dbContext)
+    public CheckoutController(AtelierDbContext dbContext, ICartService cart, ICartViewModelBuilder cartBuilder, IPaymentGateway paymentGateway) : base(dbContext)
     {
         _cart = cart;
         _cartBuilder = cartBuilder;
+        _paymentGateway = paymentGateway;
     }
 
     [HttpGet]
@@ -45,23 +47,40 @@ public class CheckoutController : PublicControllerBase
         }
 
         var number = $"MR-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..12].ToUpperInvariant()}";
-        var order = new Order(number, model.CustomerName.Trim(), NormalizePhone(model.Phone), model.Province.Trim(),
+        var publicToken = Guid.NewGuid().ToString("N");
+        var order = new Order(number, publicToken, model.CustomerName.Trim(), NormalizePhone(model.Phone), model.Province.Trim(),
             model.City.Trim(), model.Address.Trim(), EmptyToNull(model.PostalCode), EmptyToNull(model.CustomerNote));
         foreach (var item in model.Cart.Items)
             order.AddItem(item.ProductId, item.Name, item.UnitPrice, item.Quantity);
 
         DbContext.Orders.Add(order);
         await DbContext.SaveChangesAsync();
+        var transaction = new PaymentTransaction(order.Id, "Zarinpal", order.Total);
+        DbContext.PaymentTransactions.Add(transaction);
+        await DbContext.SaveChangesAsync();
+
+        var callbackUrl = Url.Action("Callback", "Payment", new { token = publicToken }, Request.Scheme)!;
+        var payment = await _paymentGateway.RequestAsync(order.Total, $"پرداخت سفارش {order.Number}", callbackUrl, order.Phone, order.Number, HttpContext.RequestAborted);
+        if (!payment.Succeeded || string.IsNullOrWhiteSpace(payment.Authority) || string.IsNullOrWhiteSpace(payment.RedirectUrl))
+        {
+            transaction.MarkFailed(payment.Code, payment.Error);
+            order.MarkPaymentFailed();
+            await DbContext.SaveChangesAsync();
+            return RedirectToAction("Result", "Payment", new { token = publicToken });
+        }
+
+        transaction.MarkRequested(payment.Authority, payment.Code);
+        await DbContext.SaveChangesAsync();
         _cart.Clear();
 
-        return RedirectToAction(nameof(Confirmation), new { number = order.Number });
+        return Redirect(payment.RedirectUrl);
     }
 
-    [HttpGet("confirmation/{number}")]
-    public async Task<IActionResult> Confirmation(string number)
+    [HttpGet("confirmation/{token}")]
+    public async Task<IActionResult> Confirmation(string token)
     {
-        var order = await DbContext.Orders.AsNoTracking().Where(item => item.Number == number)
-            .Select(item => new OrderConfirmationViewModel { OrderNumber = item.Number, Total = item.Total, Phone = item.Phone })
+        var order = await DbContext.Orders.AsNoTracking().Where(item => item.PublicToken == token && item.PaymentStatus == Atelier.Domain.Enums.PaymentStatus.Paid)
+            .Select(item => new OrderConfirmationViewModel { OrderNumber = item.Number, PublicToken = item.PublicToken, Total = item.Total, Phone = item.Phone })
             .FirstOrDefaultAsync();
         if (order is null) return NotFound();
 

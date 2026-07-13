@@ -28,15 +28,20 @@ In Admin → Media, use **Store external images in database**. The action import
 
 ## Commerce flow
 
-Fixed-price products support a session-backed cart and server-validated checkout. Checkout re-reads every current product price before creating an order, stores immutable line-price snapshots, and exposes fulfillment status in Admin → Orders. Contact-price products and uncertain buyers can call directly, open WhatsApp, or submit a callback request.
+Fixed-price products support a session-backed cart, server-validated checkout and production Zarinpal request/verify flow. Checkout re-reads every current price, stores immutable line-price snapshots, redirects only to Zarinpal, and marks an order paid only after server-to-server verification. Configure the merchant identifier as a deployment secret:
 
-The confirmation page deliberately does not claim that payment has completed. Stock and vehicle compatibility are verified first, then staff send the customer the official secure payment link. Connect a licensed Iranian payment gateway before changing this workflow to immediate card payment.
+```text
+Payment__Zarinpal__MerchantId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Contact-price products use a direct phone link only. Orders have a private tracking token, status timeline, payment history, and an order-number/mobile lookup protected by rate limiting.
 
 ## Production checklist
 
 - Apply EF Core migrations before starting the application.
-- Verify cart, checkout, callback requests and Admin → Orders on the production database.
+- Verify cart, Zarinpal request/callback/verification, order tracking and Admin → Orders on the production database.
 - Provide the connection string through deployment secrets.
+- Provide the Zarinpal merchant identifier through deployment secrets; never put it in `appsettings.json`.
 - Rotate the previously exposed SQL password.
 - Replace placeholder contact details in Admin → Settings.
 - Run `dotnet build Atelier.slnx` and smoke-test authentication, catalog routes, image import, sitemap and robots endpoints.

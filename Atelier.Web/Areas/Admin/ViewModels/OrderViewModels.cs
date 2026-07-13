@@ -11,6 +11,9 @@ public class OrderListItemViewModel
     public decimal Total { get; set; }
     public int ItemsCount { get; set; }
     public OrderStatus Status { get; set; }
+    public PaymentStatus PaymentStatus { get; set; }
+    public string? Carrier { get; set; }
+    public string? TrackingNumber { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -27,9 +30,17 @@ public class OrderDetailsViewModel
     public string? CustomerNote { get; set; }
     public decimal Total { get; set; }
     public OrderStatus Status { get; set; }
+    public PaymentStatus PaymentStatus { get; set; }
+    public string? Carrier { get; set; }
+    public string? TrackingNumber { get; set; }
     public DateTime CreatedAt { get; set; }
     public IReadOnlyList<OrderItemViewModel> Items { get; set; } = Array.Empty<OrderItemViewModel>();
+    public IReadOnlyList<OrderHistoryItemViewModel> History { get; set; } = Array.Empty<OrderHistoryItemViewModel>();
+    public IReadOnlyList<PaymentItemViewModel> Payments { get; set; } = Array.Empty<PaymentItemViewModel>();
 }
+
+public class OrderHistoryItemViewModel { public OrderStatus Status { get; set; } public string? Note { get; set; } public DateTime CreatedAt { get; set; } }
+public class PaymentItemViewModel { public string Gateway { get; set; } = string.Empty; public PaymentStatus Status { get; set; } public string? ReferenceId { get; set; } public int? GatewayCode { get; set; } public DateTime CreatedAt { get; set; } }
 
 public class OrderItemViewModel
 {

@@ -15,6 +15,10 @@ public class CatalogController : PublicControllerBase
         "pages",
         "projects",
         "categories",
+        "cart",
+        "checkout",
+        "payment",
+        "order-tracking",
         "admin"
     };
 
@@ -23,7 +27,7 @@ public class CatalogController : PublicControllerBase
     }
 
     [HttpGet("categories")]
-    public async Task<IActionResult> Index(string? q)
+    public async Task<IActionResult> Index(string? q, int? year, string? engine, string? trim)
     {
         var categories = await LoadCategoryNodesAsync();
         var (mediaMap, fallbackMedia) = await LoadCategoryMediaAsync(categories);
@@ -35,26 +39,41 @@ public class CatalogController : PublicControllerBase
             new() { Title = "دسته بندی ها" }
         };
 
-        var query = string.IsNullOrWhiteSpace(q) ? null : q.Trim()[..Math.Min(q.Trim().Length, 100)];
+        var normalizedQuery = string.IsNullOrWhiteSpace(q) ? null : PersianSearchNormalizer.Normalize(q);
+        var query = normalizedQuery?[..Math.Min(normalizedQuery.Length, 100)];
         var searchResults = new List<ProductCardViewModel>();
-        if (query is not null)
+        engine = string.IsNullOrWhiteSpace(engine) ? null : engine.Trim();
+        trim = string.IsNullOrWhiteSpace(trim) ? null : trim.Trim();
+        var hasVehicleFilter = year.HasValue || engine is not null || trim is not null;
+        var hasDiscoveryFilter = query is not null || hasVehicleFilter;
+        if (hasDiscoveryFilter)
         {
+            var compactQuery = PersianSearchNormalizer.CompactPartNumber(query ?? string.Empty);
             var matches = await DbContext.Products.AsNoTracking()
                 .Where(product => product.Status == ProductStatus.Published &&
-                    (product.Name.Contains(query) || (product.Description != null && product.Description.Contains(query))))
+                    (query == null || product.Name.Contains(query) || product.Slug.Contains(query) ||
+                     (product.Description != null && product.Description.Contains(query)) ||
+                     (product.Brand != null && product.Brand.Contains(query)) ||
+                     (product.Manufacturer != null && product.Manufacturer.Contains(query)) ||
+                     (product.OemPartNumber != null && (product.OemPartNumber.Contains(query) || (compactQuery.Length >= 2 && product.OemPartNumber.Replace("-", "").Replace(" ", "").Contains(compactQuery)))) ||
+                     (product.TechnicalPartNumber != null && (product.TechnicalPartNumber.Contains(query) || (compactQuery.Length >= 2 && product.TechnicalPartNumber.Replace("-", "").Replace(" ", "").Contains(compactQuery)))) ||
+                     (product.AlternatePartNumbers != null && product.AlternatePartNumbers.Contains(query))) &&
+                    (!hasVehicleFilter || product.Compatibilities.Any(c => (!year.HasValue || (c.Vehicle.YearFrom <= year.Value && (c.Vehicle.YearTo == null || c.Vehicle.YearTo >= year.Value))) &&
+                                                     (engine == null || c.Vehicle.Engine == engine) &&
+                                                     (trim == null || c.Vehicle.Trim == trim))))
                 .OrderBy(product => product.Name).Take(30)
                 .Select(product => new ProductSnapshot
                 {
                     Id = product.Id, Name = product.Name, Slug = product.Slug,
                     Description = product.Description, Price = product.Price, PriceType = product.PriceType,
                     PrimaryMedia = product.Gallery.OrderBy(media => media.Id)
-                        .Select(media => new MediaSnapshot(media.Url, media.AltText)).FirstOrDefault()
+                        .Select(media => new MediaSnapshot(media.Url, media.AltText)).FirstOrDefault(),
+                    PrimaryCategoryId = product.Categories.OrderBy(category => category.Id).Select(category => (int?)category.Id).FirstOrDefault()
                 }).ToListAsync();
 
             foreach (var product in matches)
             {
-                if (!CatalogRoutingHelper.TryGetPrimaryCategorySlug(product.Slug, out var categorySlug)) continue;
-                var category = categories.FirstOrDefault(item => item.Slug == categorySlug);
+                var category = categories.FirstOrDefault(item => item.Id == product.PrimaryCategoryId);
                 if (category is null) continue;
                 var chain = CatalogRoutingHelper.BuildCategoryChain(categories, category);
                 searchResults.Add(new ProductCardViewModel
@@ -71,11 +90,22 @@ public class CatalogController : PublicControllerBase
             }
         }
 
+        var yearRanges = await DbContext.Vehicles.AsNoTracking().Where(v => v.IsActive)
+            .Select(v => new { v.YearFrom, v.YearTo }).ToListAsync();
+        var yearOptions = yearRanges.SelectMany(v => Enumerable.Range(v.YearFrom, (v.YearTo ?? v.YearFrom) - v.YearFrom + 1))
+            .Distinct().OrderByDescending(value => value).ToList();
+
         var model = new CategoryViewModel
         {
             Categories = tree,
             Breadcrumbs = breadcrumbs,
             Query = query,
+            VehicleYear = year,
+            Engine = engine,
+            Trim = trim,
+            YearOptions = yearOptions,
+            EngineOptions = await DbContext.Vehicles.AsNoTracking().Where(v => v.IsActive).Select(v => v.Engine).Distinct().OrderBy(value => value).ToListAsync(),
+            TrimOptions = await DbContext.Vehicles.AsNoTracking().Where(v => v.IsActive).Select(v => v.Trim).Distinct().OrderBy(value => value).ToListAsync(),
             SearchResults = searchResults
         };
 
@@ -84,7 +114,7 @@ public class CatalogController : PublicControllerBase
         model.MetaDescription = "خرید قطعات موتور، ترمز، تعلیق، بدنه، برق و لوازم مصرفی پژو ۲۰۰۸.";
         model.CanonicalUrl = canonicalUrl ?? string.Empty;
         SetSeoMetadata(model.MetaTitle, model.MetaDescription, canonicalUrl);
-        if (query is not null) ViewData["Robots"] = "noindex,follow";
+        if (hasDiscoveryFilter) ViewData["Robots"] = "noindex,follow";
         SetBreadcrumbSchema(breadcrumbs);
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
@@ -122,9 +152,11 @@ public class CatalogController : PublicControllerBase
             if (TryResolveCategoryPath(categories, categorySegments, out var categoryChain))
             {
                 var productSlug = segments.Last();
+                var categoryId = categoryChain.Last().Id;
                 var product = await DbContext.Products
                     .AsNoTracking()
-                    .Where(item => item.Slug == productSlug && item.Status == ProductStatus.Published)
+                    .Where(item => item.Slug == productSlug && item.Status == ProductStatus.Published &&
+                                   item.Categories.Any(category => category.Id == categoryId))
                     .Select(item => new ProductSnapshot
                     {
                         Id = item.Id,
@@ -132,11 +164,16 @@ public class CatalogController : PublicControllerBase
                         Slug = item.Slug,
                         Description = item.Description,
                         Price = item.Price,
-                        PriceType = item.PriceType
+                        PriceType = item.PriceType,
+                        Brand = item.Brand,
+                        Manufacturer = item.Manufacturer,
+                        OemPartNumber = item.OemPartNumber,
+                        TechnicalPartNumber = item.TechnicalPartNumber,
+                        AlternatePartNumbers = item.AlternatePartNumbers
                     })
                     .FirstOrDefaultAsync();
 
-                if (product is not null && IsProductInCategory(productSlug, categoryChain.Last().Slug, categories))
+                if (product is not null)
                 {
                     return await RenderProductDetailAsync(product, categoryChain);
                 }
@@ -163,12 +200,11 @@ public class CatalogController : PublicControllerBase
             .Select(item => BuildCategoryCard(item, categoryChain, mediaMap, fallbackMedia))
             .ToList();
 
-        var productSlugs = CatalogRoutingHelper.GetProductSlugsForCategory(currentCategory.Slug, categories);
-        var productData = productSlugs.Count == 0
-            ? new List<ProductSnapshot>()
-            : await DbContext.Products
+        var categoryIds = GetCategoryAndDescendantIds(currentCategory.Id, categories);
+        var productData = await DbContext.Products
                 .AsNoTracking()
-                .Where(product => productSlugs.Contains(product.Slug) && product.Status == ProductStatus.Published)
+                .Where(product => product.Status == ProductStatus.Published &&
+                                  product.Categories.Any(category => categoryIds.Contains(category.Id)))
                 .OrderBy(product => product.Name)
                 .Select(product => new ProductSnapshot
                 {
@@ -262,6 +298,21 @@ public class CatalogController : PublicControllerBase
             Gallery = gallery
         };
 
+        model.Brand = product.Brand;
+        model.Manufacturer = product.Manufacturer;
+        model.OemPartNumber = product.OemPartNumber;
+        model.TechnicalPartNumber = product.TechnicalPartNumber;
+        model.AlternatePartNumbers = product.AlternatePartNumbers;
+        model.CompatibleVehicles = await DbContext.ProductCompatibilities.AsNoTracking()
+            .Where(item => item.ProductId == product.Id && item.Vehicle.IsActive)
+            .OrderBy(item => item.Vehicle.Make).ThenBy(item => item.Vehicle.Model).ThenBy(item => item.Vehicle.YearFrom)
+            .Select(item => new VehicleCompatibilityViewModel
+            {
+                Make = item.Vehicle.Make, Model = item.Vehicle.Model, YearFrom = item.Vehicle.YearFrom,
+                YearTo = item.Vehicle.YearTo, Engine = item.Vehicle.Engine, Trim = item.Vehicle.Trim,
+                RequiresVinCheck = item.RequiresVinCheck, Note = item.Note
+            }).ToListAsync();
+
         model.MetaTitle = product.Name;
         model.MetaDescription = SeoContentHelper.BuildMetaDescription(description) ?? product.Name;
         model.CanonicalUrl = canonicalUrl;
@@ -274,7 +325,13 @@ public class CatalogController : PublicControllerBase
             CanonicalUrl = canonicalUrl,
             ImageUrl = gallery.FirstOrDefault()?.Url,
             Price = product.Price.HasValue ? product.Price.Value * 10 : null,
-            CurrencyCode = "IRR"
+            CurrencyCode = "IRR",
+            Sku = product.TechnicalPartNumber ?? product.Slug,
+            Mpn = product.OemPartNumber,
+            Brand = product.Brand,
+            AvailabilityUrl = "https://schema.org/InStock",
+            ItemConditionUrl = "https://schema.org/NewCondition",
+            ReturnPolicyUrl = SeoHelper.BuildAbsoluteUrl(Request, "/pages/shipping-returns")
         });
 
         return View("Product", model);
@@ -289,6 +346,12 @@ public class CatalogController : PublicControllerBase
         public decimal? Price { get; init; }
         public PriceType PriceType { get; init; }
         public MediaSnapshot? PrimaryMedia { get; init; }
+        public int? PrimaryCategoryId { get; init; }
+        public string? Brand { get; init; }
+        public string? Manufacturer { get; init; }
+        public string? OemPartNumber { get; init; }
+        public string? TechnicalPartNumber { get; init; }
+        public string? AlternatePartNumbers { get; init; }
     }
 
     private async Task<IReadOnlyList<CatalogCategoryNode>> LoadCategoryNodesAsync()
@@ -396,9 +459,18 @@ public class CatalogController : PublicControllerBase
         return chain.Count > 0;
     }
 
-    private static bool IsProductInCategory(string productSlug, string categorySlug, IReadOnlyList<CatalogCategoryNode> categories)
+    private static HashSet<int> GetCategoryAndDescendantIds(int categoryId, IReadOnlyList<CatalogCategoryNode> categories)
     {
-        return CatalogRoutingHelper.GetProductSlugsForCategory(categorySlug, categories).Contains(productSlug);
+        var result = new HashSet<int> { categoryId };
+        var queue = new Queue<int>();
+        queue.Enqueue(categoryId);
+        while (queue.Count > 0)
+        {
+            var parentId = queue.Dequeue();
+            foreach (var child in categories.Where(item => item.ParentId == parentId))
+                if (result.Add(child.Id)) queue.Enqueue(child.Id);
+        }
+        return result;
     }
 
     private static List<BreadcrumbItemViewModel> BuildBreadcrumbs(IReadOnlyList<CatalogCategoryNode> chain)

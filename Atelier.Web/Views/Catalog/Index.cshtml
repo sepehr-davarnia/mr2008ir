@@ -8,18 +8,21 @@
 
     <section class="hero-card mb-4 reveal">
         <h1 class="h4 fw-bold mb-2">دسته بندی محصولات</h1>
-        <p class="text-muted mb-0">انتخاب سریع قطعه مناسب پژو ۲۰۰۸ بر اساس سیستم خودرو.</p>
+        <p class="text-muted mb-0">با نام یا کد قطعه جست‌وجو کنید و نتیجه را بر اساس سال، موتور و تریم خودرو تطبیق دهید.</p>
         <form method="get" action="/categories" class="catalog-search mt-4" role="search">
             <label class="visually-hidden" for="catalogQuery">جست‌وجوی قطعه</label>
             <input id="catalogQuery" name="q" value="@Model.Query" maxlength="100" placeholder="نام قطعه یا کد فنی را وارد کنید" />
-            <button type="submit">جست‌وجو</button>
+            <select name="year" aria-label="سال مدل"><option value="">همه سال‌ها</option>@foreach (var option in Model.YearOptions) { <option value="@option" selected="@(Model.VehicleYear == option)">@option</option> }</select>
+            <select name="engine" aria-label="موتور"><option value="">همه موتورها</option>@foreach (var option in Model.EngineOptions) { <option value="@option" selected="@(Model.Engine == option)">@option</option> }</select>
+            <select name="trim" aria-label="تریم"><option value="">همه تریم‌ها</option>@foreach (var option in Model.TrimOptions) { <option value="@option" selected="@(Model.Trim == option)">@option</option> }</select>
+            <button type="submit">پیدا کردن قطعه سازگار</button>
         </form>
     </section>
 
-    @if (!string.IsNullOrWhiteSpace(Model.Query))
+    @if (Model.HasDiscoveryFilter)
     {
         <section class="mb-5 reveal" aria-live="polite">
-            <div class="section-title">نتایج جست‌وجوی «@Model.Query»</div>
+            <div class="section-title">قطعات مطابق جست‌وجو و خودروی شما</div>
             @if (!Model.SearchResults.Any())
             {
                 <div class="content-card text-center"><h2 class="h6 fw-bold">قطعه‌ای پیدا نشد</h2><p class="text-muted mb-0">نام کوتاه‌تر، کد فنی یا دسته‌بندی قطعه را امتحان کنید.</p></div>

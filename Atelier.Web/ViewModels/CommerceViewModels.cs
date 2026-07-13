@@ -61,25 +61,16 @@ public class CheckoutViewModel
 public class OrderConfirmationViewModel
 {
     public string OrderNumber { get; set; } = string.Empty;
+    public string PublicToken { get; set; } = string.Empty;
     public decimal Total { get; set; }
     public string Phone { get; set; } = string.Empty;
 }
 
-public class CallToBuyInputModel
+public sealed class PaymentResultViewModel
 {
-    [Required]
-    public int ProductId { get; set; }
-
-    [Required(ErrorMessage = "نام خود را وارد کنید.")]
-    [StringLength(120)]
-    public string Name { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "شماره موبایل را وارد کنید.")]
-    [RegularExpression(@"^(?:\+98|0098|98|0)?9\d{9}$", ErrorMessage = "شماره موبایل معتبر نیست.")]
-    public string Phone { get; set; } = string.Empty;
-
-    [StringLength(300)]
-    public string? Note { get; set; }
-
-    public string? ReturnUrl { get; set; }
+    public bool Succeeded { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
+    public string PublicToken { get; set; } = string.Empty;
+    public string? ReferenceId { get; set; }
+    public string Message { get; set; } = string.Empty;
 }

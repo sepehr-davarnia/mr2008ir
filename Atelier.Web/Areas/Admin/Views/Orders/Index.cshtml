@@ -5,13 +5,13 @@
     Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     ViewData["Title"] = "سفارش‌ها";
     OrderStatus? filter = ViewData["FilterStatus"] is OrderStatus value ? value : null;
-    string StatusText(OrderStatus status) => status switch { OrderStatus.AwaitingReview => "در انتظار بررسی", OrderStatus.Confirmed => "تأیید شده", OrderStatus.Preparing => "در حال آماده‌سازی", OrderStatus.Shipped => "ارسال شده", OrderStatus.Completed => "تکمیل شده", _ => "لغو شده" };
+    string StatusText(OrderStatus status) => status switch { OrderStatus.AwaitingPayment => "در انتظار پرداخت", OrderStatus.AwaitingReview => "در انتظار بررسی", OrderStatus.Confirmed => "تأیید شده", OrderStatus.Preparing => "در حال آماده‌سازی", OrderStatus.Shipped => "ارسال شده", OrderStatus.Completed => "تکمیل شده", _ => "لغو شده" };
 }
 <div class="admin-card">
     <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4"><div><h2 class="h5 fw-bold mb-1">سفارش‌های آنلاین</h2><p class="text-muted mb-0">پیگیری سفارش از تأیید فنی تا تحویل.</p></div>
     <form method="get" class="d-flex gap-2"><select class="form-select" name="status"><option value="">همه وضعیت‌ها</option>@foreach (var status in Enum.GetValues<OrderStatus>()) { <option value="@status" selected="@(filter == status)">@StatusText(status)</option> }</select><button class="btn btn-primary" type="submit">فیلتر</button></form></div>
     @if (!Model.Any()) { <div class="alert alert-light border mb-0">سفارشی در این وضعیت وجود ندارد.</div> }
-    else { <div class="table-responsive"><table class="table align-middle"><thead><tr><th>سفارش</th><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ</th><th></th></tr></thead><tbody>
-    @foreach (var order in Model) { <tr><td><b dir="ltr">@order.Number</b><small class="d-block text-muted">@order.ItemsCount قطعه</small></td><td>@order.CustomerName<small class="d-block text-muted" dir="ltr">@order.Phone</small></td><td>@LocalizationHelper.FormatPrice(order.Total, PriceType.Fixed)</td><td><span class="badge text-bg-light">@StatusText(order.Status)</span></td><td>@LocalizationHelper.FormatDate(order.CreatedAt)</td><td><a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@order.Id">مشاهده</a></td></tr> }
+    else { <div class="table-responsive"><table class="table align-middle"><thead><tr><th>سفارش</th><th>مشتری</th><th>مبلغ</th><th>پرداخت</th><th>وضعیت</th><th>تاریخ</th><th></th></tr></thead><tbody>
+    @foreach (var order in Model) { <tr><td><b dir="ltr">@order.Number</b><small class="d-block text-muted">@order.ItemsCount قطعه</small></td><td>@order.CustomerName<small class="d-block text-muted" dir="ltr">@order.Phone</small></td><td>@LocalizationHelper.FormatPrice(order.Total, PriceType.Fixed)</td><td><span class="badge @(order.PaymentStatus == PaymentStatus.Paid ? "text-bg-success" : "text-bg-warning")">@(order.PaymentStatus == PaymentStatus.Paid ? "پرداخت‌شده" : "تکمیل‌نشده")</span></td><td><span class="badge text-bg-light">@StatusText(order.Status)</span></td><td>@LocalizationHelper.FormatDate(order.CreatedAt)</td><td><a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@order.Id">مشاهده</a></td></tr> }
     </tbody></table></div> }
 </div>

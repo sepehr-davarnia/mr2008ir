@@ -57,6 +57,7 @@ public class HomeController : PublicControllerBase
                 product.Description,
                 product.Price,
                 product.PriceType,
+                PrimaryCategoryId = product.Categories.OrderBy(category => category.Id).Select(category => (int?)category.Id).FirstOrDefault(),
                 PrimaryMedia = product.Gallery
                     .OrderBy(media => media.Id)
                     .Select(media => new MediaSnapshot(media.Url, media.AltText))
@@ -67,9 +68,9 @@ public class HomeController : PublicControllerBase
         var productCards = productData.Select(product =>
         {
             var productUrl = "/categories";
-            if (CatalogRoutingHelper.TryGetPrimaryCategorySlug(product.Slug, out var categorySlug))
+            if (product.PrimaryCategoryId.HasValue)
             {
-                var category = categoryNodes.FirstOrDefault(item => item.Slug.Equals(categorySlug, StringComparison.OrdinalIgnoreCase));
+                var category = categoryNodes.FirstOrDefault(item => item.Id == product.PrimaryCategoryId.Value);
                 if (category is not null)
                 {
                     var chain = CatalogRoutingHelper.BuildCategoryChain(categoryNodes, category);

@@ -2,10 +2,11 @@ namespace Atelier.Domain.Enums;
 
 public enum OrderStatus
 {
-    AwaitingReview = 0,
-    Confirmed = 1,
-    Preparing = 2,
-    Shipped = 3,
-    Completed = 4,
-    Cancelled = 5
+    AwaitingPayment = 0,
+    AwaitingReview = 1,
+    Confirmed = 2,
+    Preparing = 3,
+    Shipped = 4,
+    Completed = 5,
+    Cancelled = 6
 }

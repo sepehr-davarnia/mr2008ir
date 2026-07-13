@@ -1,4 +1,4 @@
-using Atelier.Infrastructure.Auth;
+﻿using Atelier.Infrastructure.Auth;
 using Atelier.Infrastructure.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +24,10 @@ public class AtelierDbContext : DbContext
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<ProductCompatibility> ProductCompatibilities => Set<ProductCompatibility>();
+    public DbSet<PaymentTransaction> PaymentTransactions => Set<PaymentTransaction>();
+    public DbSet<OrderStatusHistory> OrderStatusHistory => Set<OrderStatusHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

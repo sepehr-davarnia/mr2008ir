@@ -40,6 +40,7 @@ public sealed class CartViewModelBuilder : ICartViewModelBuilder
             .Select(product => new
             {
                 product.Id, product.Name, product.Slug, Price = product.Price!.Value,
+                PrimaryCategoryId = product.Categories.OrderBy(category => category.Id).Select(category => (int?)category.Id).FirstOrDefault(),
                 ImageUrl = product.Gallery.OrderBy(media => media.Id).Select(media => media.Url).FirstOrDefault()
             }).ToListAsync();
 
@@ -49,7 +50,7 @@ public sealed class CartViewModelBuilder : ICartViewModelBuilder
         {
             ProductId = product.Id,
             Name = product.Name,
-            Url = BuildProductUrl(product.Slug, categories),
+            Url = BuildProductUrl(product.Slug, product.PrimaryCategoryId, categories),
             ImageUrl = product.ImageUrl,
             UnitPrice = product.Price,
             Quantity = stored[product.Id]
@@ -58,10 +59,10 @@ public sealed class CartViewModelBuilder : ICartViewModelBuilder
         return new CartViewModel { Items = items, Total = items.Sum(item => item.LineTotal) };
     }
 
-    private static string BuildProductUrl(string productSlug, IReadOnlyList<CatalogCategoryNode> categories)
+    private static string BuildProductUrl(string productSlug, int? categoryId, IReadOnlyList<CatalogCategoryNode> categories)
     {
-        if (!CatalogRoutingHelper.TryGetPrimaryCategorySlug(productSlug, out var categorySlug)) return "/categories";
-        var category = categories.FirstOrDefault(item => item.Slug.Equals(categorySlug, StringComparison.OrdinalIgnoreCase));
+        if (!categoryId.HasValue) return "/categories";
+        var category = categories.FirstOrDefault(item => item.Id == categoryId.Value);
         if (category is null) return "/categories";
         return CatalogRoutingHelper.BuildProductPath(CatalogRoutingHelper.BuildCategoryChain(categories, category), productSlug);
     }

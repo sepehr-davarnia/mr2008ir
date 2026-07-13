@@ -21,16 +21,6 @@
     toggle?.focus();
   });
 
-  const callSheet = document.querySelector('[data-call-sheet]');
-  document.querySelector('[data-call-sheet-open]')?.addEventListener('click', () => {
-    if (typeof callSheet?.showModal === 'function') callSheet.showModal();
-    else callSheet?.setAttribute('open', '');
-  });
-  document.querySelector('[data-call-sheet-close]')?.addEventListener('click', () => callSheet?.close());
-  callSheet?.addEventListener('click', event => {
-    if (event.target === callSheet) callSheet.close();
-  });
-
   const toast = document.querySelector('[data-cart-toast]');
   const announceCart = message => {
     if (!toast) return;

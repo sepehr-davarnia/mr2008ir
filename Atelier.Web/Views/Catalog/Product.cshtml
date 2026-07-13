@@ -4,10 +4,6 @@
     const string gallerySizes = "(min-width: 1200px) 25vw, (min-width: 992px) 33vw, 50vw";
     var layout = ViewData["Layout"] as Atelier.Web.ViewModels.LayoutViewModel ?? new Atelier.Web.ViewModels.LayoutViewModel();
     var phoneHref = string.IsNullOrWhiteSpace(layout.Phone) ? null : "tel:" + new string(layout.Phone.Where(c => char.IsDigit(c) || c == '+').ToArray());
-    var whatsappValue = layout.WhatsApp?.Trim();
-    var whatsappHref = string.IsNullOrWhiteSpace(whatsappValue) ? null :
-        (whatsappValue.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? whatsappValue :
-        "https://wa.me/" + new string(whatsappValue.Where(char.IsDigit).ToArray()) + "?text=" + Uri.EscapeDataString($"برای خرید {Model.Title} راهنمایی می‌خواهم."));
 }
 
 <div class="container-xxl py-4 page-shell">
@@ -23,8 +19,6 @@
                     <p class="text-muted mb-0">@Model.ShortDescription</p>
                 }
                 <div class="product-confidence mt-4"><span>✓ ضمانت اصالت</span><span>✓ بررسی سازگاری</span><span>✓ ارسال مطمئن</span></div>
-                @if (TempData["CallSuccess"] is string callSuccess) { <div class="commerce-alert mt-3" role="status">✓ @callSuccess</div> }
-                @if (TempData["CallError"] is string callError) { <div class="commerce-alert commerce-alert--error mt-3" role="alert">@callError</div> }
                 <div class="product-purchase mt-4">
                     @if (Model.CanPurchaseOnline)
                     {
@@ -35,9 +29,12 @@
                             <button class="purchase-primary" type="submit"><span>افزودن به سبد خرید</span><small>خرید آنلاین و ثبت امن سفارش</small></button>
                         </form>
                     }
-                    <button class="purchase-call" type="button" data-call-sheet-open><span>تماس برای خرید</span><small>مشاوره فوری با کارشناس قطعه</small></button>
+                    @if (phoneHref is not null)
+                    {
+                        <a class="purchase-call" href="@phoneHref"><span>تماس برای خرید</span><small dir="ltr">@layout.Phone</small></a>
+                    }
                 </div>
-                <p class="purchase-microcopy">پرداخت پس از تأیید موجودی و سازگاری قطعه انجام می‌شود.</p>
+                <p class="purchase-microcopy">پرداخت آنلاین از درگاه امن انجام می‌شود؛ در صورت تردید، پیش از خرید برای بررسی VIN تماس بگیرید.</p>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.HeroImageUrl))
             {
@@ -91,6 +88,39 @@
         </div>
     </div>
 
+    <section class="content-card mt-4 reveal" aria-labelledby="compatibility-title">
+        <div class="product-detail-grid">
+            <div>
+                <span class="eyebrow">شناسه‌های فنی</span>
+                <h2 class="h5 fw-bold mt-2">اطلاعات قطعه</h2>
+                <dl class="technical-identifiers">
+                    @if (!string.IsNullOrWhiteSpace(Model.Brand)) { <div><dt>برند</dt><dd>@Model.Brand</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(Model.Manufacturer)) { <div><dt>سازنده</dt><dd>@Model.Manufacturer</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(Model.OemPartNumber)) { <div><dt>شماره OEM</dt><dd dir="ltr">@Model.OemPartNumber</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(Model.TechnicalPartNumber)) { <div><dt>کد فنی</dt><dd dir="ltr">@Model.TechnicalPartNumber</dd></div> }
+                    @if (!string.IsNullOrWhiteSpace(Model.AlternatePartNumbers)) { <div><dt>کدهای جایگزین</dt><dd dir="ltr">@Model.AlternatePartNumbers</dd></div> }
+                </dl>
+            </div>
+            <div>
+                <span class="eyebrow">تطبیق خودرو</span>
+                <h2 id="compatibility-title" class="h5 fw-bold mt-2">سازگاری تأییدشده</h2>
+                @if (!Model.CompatibleVehicles.Any())
+                {
+                    <div class="compatibility-empty">برای اطمینان از سازگاری، پیش از خرید تماس بگیرید.</div>
+                }
+                else
+                {
+                    <div class="compatibility-list">
+                        @foreach (var vehicle in Model.CompatibleVehicles)
+                        {
+                            <article><div class="compatibility-icon">✓</div><div><b>@vehicle.Make @vehicle.Model — @vehicle.Trim</b><span>@vehicle.YearFrom تا @(vehicle.YearTo?.ToString() ?? "اکنون") · @vehicle.Engine</span>@if (vehicle.RequiresVinCheck) { <em>تأیید VIN پیش از ارسال</em> }@if (!string.IsNullOrWhiteSpace(vehicle.Note)) { <small>@vehicle.Note</small> }</div></article>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
     @if (Model.Gallery.Any())
     {
         <section class="mt-4">
@@ -110,24 +140,3 @@
         </section>
     }
 </div>
-
-<dialog class="call-sheet" data-call-sheet aria-labelledby="call-sheet-title">
-    <button class="call-sheet__close" type="button" data-call-sheet-close aria-label="بستن">×</button>
-    <span class="eyebrow">خرید با کمک کارشناس</span>
-    <h2 id="call-sheet-title">برای خرید @Model.Title</h2>
-    <p>همین حالا تماس بگیرید یا شماره‌تان را بگذارید تا کارشناس با شما تماس بگیرد.</p>
-    <div class="call-sheet__direct">
-        @if (phoneHref is not null) { <a class="purchase-primary" href="@phoneHref">تماس مستقیم <b dir="ltr">@layout.Phone</b></a> }
-        @if (whatsappHref is not null) { <a class="purchase-whatsapp" href="@whatsappHref" target="_blank" rel="noopener">پیام در واتساپ</a> }
-    </div>
-    <div class="call-sheet__divider"><span>یا درخواست تماس ثبت کنید</span></div>
-    <form method="post" action="/call-to-buy" class="call-form">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="ProductId" value="@Model.Id" />
-        <input type="hidden" name="ReturnUrl" value="@Context.Request.Path" />
-        <label><span>نام</span><input name="Name" required maxlength="120" autocomplete="name" /></label>
-        <label><span>شماره موبایل</span><input name="Phone" required inputmode="tel" autocomplete="tel" dir="ltr" placeholder="0912 123 4567" /></label>
-        <label><span>توضیح کوتاه <small>(اختیاری)</small></span><textarea name="Note" maxlength="300" rows="2" placeholder="مثلاً مدل خودرو یا کد فنی"></textarea></label>
-        <button class="checkout-button" type="submit">درخواست تماس رایگان</button>
-    </form>
-</dialog>

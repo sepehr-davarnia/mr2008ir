@@ -31,7 +31,11 @@ public class SitemapController : Controller
 
         var products = await _dbContext.Products.AsNoTracking()
             .Where(product => product.Status == ProductStatus.Published)
-            .Select(product => new { product.Slug, product.UpdatedAt, product.CreatedAt })
+            .Select(product => new
+            {
+                product.Slug, product.UpdatedAt, product.CreatedAt,
+                PrimaryCategoryId = product.Categories.OrderBy(category => category.Id).Select(category => (int?)category.Id).FirstOrDefault()
+            })
             .ToListAsync();
         var posts = await _dbContext.BlogPosts.AsNoTracking()
             .Where(post => post.PublishedAt != null)
@@ -54,8 +58,7 @@ public class SitemapController : Controller
 
         foreach (var product in products)
         {
-            if (!CatalogRoutingHelper.TryGetPrimaryCategorySlug(product.Slug, out var categorySlug)) continue;
-            var category = categories.FirstOrDefault(item => item.Slug == categorySlug);
+            var category = categories.FirstOrDefault(item => item.Id == product.PrimaryCategoryId);
             if (category is null) continue;
             var chain = CatalogRoutingHelper.BuildCategoryChain(categories, category);
             urls.Add(new SitemapUrl(baseUrl + CatalogRoutingHelper.BuildProductPath(chain, product.Slug),

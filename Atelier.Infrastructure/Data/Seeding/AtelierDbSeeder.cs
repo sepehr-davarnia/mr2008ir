@@ -8,9 +8,10 @@ public static class AtelierDbSeeder
     public static async Task SeedAsync(AtelierDbContext dbContext)
     {
         await SeedSettingsAsync(dbContext);
-        await SeedCategoriesAsync(dbContext);
+        var categories = await SeedCategoriesAsync(dbContext);
+        var vehicles = await SeedVehiclesAsync(dbContext);
         var media = await SeedProductMediaAsync(dbContext);
-        await SeedProductsAsync(dbContext, media);
+        await SeedProductsAsync(dbContext, media, categories, vehicles);
         await SeedPagesAsync(dbContext);
         await SeedArticlesAsync(dbContext);
     }
@@ -28,7 +29,7 @@ public static class AtelierDbSeeder
         }
     }
 
-    private static async Task SeedCategoriesAsync(AtelierDbContext dbContext)
+    private static async Task<Dictionary<string, Category>> SeedCategoriesAsync(AtelierDbContext dbContext)
     {
         var seeds = new[]
         {
@@ -47,6 +48,30 @@ public static class AtelierDbSeeder
             else dbContext.Categories.Add(new Category(seed.Name, seed.Slug));
         }
         await dbContext.SaveChangesAsync();
+        var slugs = seeds.Select(item => item.Slug).ToArray();
+        return await dbContext.Categories.Where(item => slugs.Contains(item.Slug)).ToDictionaryAsync(item => item.Slug);
+    }
+
+    private static async Task<Dictionary<string, Vehicle>> SeedVehiclesAsync(AtelierDbContext dbContext)
+    {
+        var seeds = new[]
+        {
+            new VehicleSeed("پژو", "۲۰۰۸", 2017, 2020, "EP6 1.6 Turbo", "Allure", "peugeot-2008-ep6-allure"),
+            new VehicleSeed("پژو", "۲۰۰۸", 2017, 2020, "EP6 1.6 Turbo", "GT Line", "peugeot-2008-ep6-gt-line")
+        };
+        var slugs = seeds.Select(item => item.Slug).ToArray();
+        var existing = await dbContext.Vehicles.Where(item => slugs.Contains(item.Slug)).ToDictionaryAsync(item => item.Slug);
+        foreach (var seed in seeds)
+        {
+            if (existing.TryGetValue(seed.Slug, out var vehicle))
+            {
+                vehicle.Update(seed.Make, seed.Model, seed.YearFrom, seed.YearTo, seed.Engine, seed.Trim);
+                vehicle.SetActive(true);
+            }
+            else dbContext.Vehicles.Add(new Vehicle(seed.Make, seed.Model, seed.YearFrom, seed.YearTo, seed.Engine, seed.Trim, seed.Slug));
+        }
+        await dbContext.SaveChangesAsync();
+        return await dbContext.Vehicles.Where(item => slugs.Contains(item.Slug)).ToDictionaryAsync(item => item.Slug);
     }
 
     private static async Task<Dictionary<string, Media>> SeedProductMediaAsync(AtelierDbContext dbContext)
@@ -76,17 +101,19 @@ public static class AtelierDbSeeder
         return await dbContext.Media.Where(item => slugs.Contains(item.Slug)).ToDictionaryAsync(item => item.Slug);
     }
 
-    private static async Task SeedProductsAsync(AtelierDbContext dbContext, IReadOnlyDictionary<string, Media> media)
+    private static async Task SeedProductsAsync(AtelierDbContext dbContext, IReadOnlyDictionary<string, Media> media,
+        IReadOnlyDictionary<string, Category> categories, IReadOnlyDictionary<string, Vehicle> vehicles)
     {
         var seeds = new[]
         {
-            new ProductSeed("فیلتر روغن پژو ۲۰۰۸ اصلی", "peugeot-2008-genuine-oil-filter", "فیلتر روغن مناسب موتور EP6 پژو ۲۰۰۸ با ضمانت اصالت. مشخصات فنی: خودرو: پژو ۲۰۰۸، موتور: EP6، نوع: فیلتر روغن", 1590000, "peugeot-2008-oil-filter"),
-            new ProductSeed("لنت ترمز جلو پژو ۲۰۰۸ تکستار", "peugeot-2008-textar-front-brake-pad", "دست کامل لنت ترمز جلو مناسب پژو ۲۰۰۸ با بررسی کد فنی. مشخصات فنی: محور: جلو، برند: تکستار، خودرو: پژو ۲۰۰۸", 5990000, "peugeot-2008-front-brake-pad"),
-            new ProductSeed("فیلتر کابین پژو ۲۰۰۸ کربن فعال", "peugeot-2008-active-carbon-cabin-filter", "فیلتر کابین کربن فعال برای جذب بو و ذرات معلق. مشخصات فنی: خودرو: پژو ۲۰۰۸، نوع: کربن فعال", 1950000, "peugeot-2008-cabin-filter"),
-            new ProductSeed("شمع موتور پژو ۲۰۰۸ و ۵۰۸", "peugeot-2008-508-spark-plug-set", "ست شمع مناسب موتور EP6 با کنترل کد فنی پیش از ارسال. مشخصات فنی: موتور: EP6، خودرو: پژو ۲۰۰۸ و ۵۰۸", 7250000, "peugeot-2008-spark-plug")
+            new ProductSeed("فیلتر روغن پژو ۲۰۰۸ اصلی", "peugeot-2008-genuine-oil-filter", "فیلتر روغن مناسب موتور EP6 پژو ۲۰۰۸ با ضمانت اصالت. مشخصات فنی: خودرو: پژو ۲۰۰۸، موتور: EP6، نوع: فیلتر روغن", 1590000, "peugeot-2008-oil-filter", "پژو", ["engine-parts", "filters-consumables"], false),
+            new ProductSeed("لنت ترمز جلو پژو ۲۰۰۸ تکستار", "peugeot-2008-textar-front-brake-pad", "دست کامل لنت ترمز جلو مناسب پژو ۲۰۰۸ با بررسی کد فنی. مشخصات فنی: محور: جلو، برند: تکستار، خودرو: پژو ۲۰۰۸", 5990000, "peugeot-2008-front-brake-pad", "Textar", ["brake-suspension"], true),
+            new ProductSeed("فیلتر کابین پژو ۲۰۰۸ کربن فعال", "peugeot-2008-active-carbon-cabin-filter", "فیلتر کابین کربن فعال برای جذب بو و ذرات معلق. مشخصات فنی: خودرو: پژو ۲۰۰۸، نوع: کربن فعال", 1950000, "peugeot-2008-cabin-filter", null, ["filters-consumables"], false),
+            new ProductSeed("شمع موتور پژو ۲۰۰۸ و ۵۰۸", "peugeot-2008-508-spark-plug-set", "ست شمع مناسب موتور EP6 با کنترل کد فنی پیش از ارسال. مشخصات فنی: موتور: EP6، خودرو: پژو ۲۰۰۸ و ۵۰۸", 7250000, "peugeot-2008-spark-plug", null, ["engine-parts", "electrical-parts"], true)
         };
         var slugs = seeds.Select(seed => seed.Slug).ToArray();
-        var existing = await dbContext.Products.Include(item => item.Gallery).Where(item => slugs.Contains(item.Slug))
+        var existing = await dbContext.Products.Include(item => item.Gallery).Include(item => item.Categories)
+            .Include(item => item.Compatibilities).Where(item => slugs.Contains(item.Slug))
             .ToDictionaryAsync(item => item.Slug, StringComparer.OrdinalIgnoreCase);
         foreach (var seed in seeds)
         {
@@ -96,6 +123,10 @@ public static class AtelierDbSeeder
                 dbContext.Products.Add(product);
             }
             else product.UpdateDetails(seed.Name, seed.Description);
+            product.UpdateCommerceDetails(seed.Brand, seed.Brand, null, null, null);
+            product.SetCategories(seed.CategorySlugs.Where(categories.ContainsKey).Select(slug => categories[slug]));
+            product.SetCompatibilities(vehicles.Values.Select(vehicle => new ProductCompatibility(vehicle.Id, seed.RequiresVinCheck,
+                seed.RequiresVinCheck ? "تطبیق با VIN پیش از ارسال توصیه می‌شود." : null)));
             product.SetPrice(seed.Price);
             product.Publish();
             var productMedia = media[seed.MediaSlug];
@@ -113,7 +144,7 @@ public static class AtelierDbSeeder
             new PageSeed("سؤالات متداول", "faq", "<h2>چطور از سازگاری قطعه مطمئن شوم؟</h2><p>کد VIN، کد فنی یا تصویر قطعه را برای کارشناسان ما ارسال کنید.</p><h2>آیا اصالت کالا تضمین می‌شود؟</h2><p>اصالت و سلامت قطعات پیش از ارسال بررسی می‌شود.</p>", "سؤالات متداول خرید قطعات پژو ۲۰۰۸", "پاسخ سؤالات رایج درباره اصالت، سازگاری و ارسال قطعات پژو ۲۰۰۸."),
             new PageSeed("ارسال و بازگشت کالا", "shipping-returns", "<h2>ارسال سفارش</h2><p>روش، زمان و هزینه ارسال پس از تأیید موجودی و مقصد با خریدار هماهنگ می‌شود. سفارش با بسته‌بندی ایمن و کد رهگیری تحویل شرکت حمل می‌شود.</p><h2>درخواست بازگشت</h2><p>در صورت مغایرت کالای دریافتی با سفارش یا آسیب در حمل، پیش از نصب قطعه و حداکثر تا ۲۴ ساعت با پشتیبانی تماس بگیرید. قطعه نصب‌شده، مخدوش یا فاقد بسته‌بندی اولیه تنها در صورت احراز ایراد فنی قابل بررسی است.</p>", "شرایط ارسال و بازگشت قطعات | mr2008.ir", "روش ارسال، پیگیری و شرایط درخواست بازگشت قطعات خریداری‌شده از mr2008.ir."),
             new PageSeed("حریم خصوصی", "privacy", "<h2>اطلاعاتی که دریافت می‌کنیم</h2><p>نام، شماره تماس و نشانی فقط برای بررسی فنی، پردازش، ارسال و پشتیبانی سفارش استفاده می‌شود.</p><h2>حفاظت از اطلاعات</h2><p>اطلاعات مشتری بدون الزام قانونی یا نیاز عملیاتی ارسال، در اختیار اشخاص نامرتبط قرار نمی‌گیرد. برای درخواست اصلاح یا حذف اطلاعات با پشتیبانی تماس بگیرید.</p>", "حریم خصوصی مشتریان | mr2008.ir", "سیاست حریم خصوصی و نحوه استفاده از اطلاعات مشتریان فروشگاه mr2008.ir."),
-            new PageSeed("شرایط خرید", "terms", "<h2>تأیید فنی و موجودی</h2><p>ثبت سفارش به معنی رزرو یا تأیید نهایی موجودی نیست. کارشناس پیش از پرداخت، سازگاری قطعه، قیمت روز و روش ارسال را تأیید می‌کند.</p><h2>قیمت و پرداخت</h2><p>مبلغ نهایی پس از تأیید موجودی و هزینه ارسال اعلام می‌شود. پرداخت فقط از مسیر رسمی معرفی‌شده توسط mr2008.ir انجام می‌شود.</p>", "شرایط خرید از mr2008.ir", "شرایط ثبت سفارش، تأیید فنی، قیمت، پرداخت و ارسال قطعات پژو ۲۰۰۸.")
+            new PageSeed("شرایط خرید", "terms", "<h2>سازگاری و موجودی</h2><p>مشخصات فنی و سازگاری ثبت‌شده راهنمای انتخاب است. برای قطعات حساس، تطبیق VIN پیش از نصب توصیه می‌شود.</p><h2>قیمت و پرداخت</h2><p>پرداخت سفارش آنلاین فقط از درگاه رسمی امن متصل به mr2008.ir انجام می‌شود. سفارش پس از تأیید درگاه وارد مرحله بررسی و آماده‌سازی خواهد شد.</p>", "شرایط خرید از mr2008.ir", "شرایط ثبت سفارش، تأیید فنی، قیمت، پرداخت و ارسال قطعات پژو ۲۰۰۸.")
         };
         var slugs = seeds.Select(seed => seed.Slug).ToArray();
         var existing = await dbContext.Pages.Where(item => slugs.Contains(item.Slug)).ToDictionaryAsync(item => item.Slug);
@@ -154,7 +185,9 @@ public static class AtelierDbSeeder
     }
 
     private sealed record MediaSeed(string Slug, string Url, string Title, string FileName);
-    private sealed record ProductSeed(string Name, string Slug, string Description, decimal Price, string MediaSlug);
+    private sealed record ProductSeed(string Name, string Slug, string Description, decimal Price, string MediaSlug,
+        string? Brand, string[] CategorySlugs, bool RequiresVinCheck);
+    private sealed record VehicleSeed(string Make, string Model, int YearFrom, int? YearTo, string Engine, string Trim, string Slug);
     private sealed record PageSeed(string Title, string Slug, string Content, string MetaTitle, string MetaDescription);
     private sealed record ArticleSeed(string Title, string Slug, string Excerpt, string Content, string MetaTitle, string MetaDescription);
 }

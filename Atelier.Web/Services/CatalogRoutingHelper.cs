@@ -6,56 +6,6 @@ namespace Atelier.Web.Services;
 
 public static class CatalogRoutingHelper
 {
-    private static readonly Dictionary<string, IReadOnlyList<string>> CategoryProductMap = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["engine-parts"] =
-        [
-            "peugeot-2008-genuine-oil-filter",
-            "peugeot-2008-508-spark-plug-set"
-        ],
-        ["brake-suspension"] = ["peugeot-2008-textar-front-brake-pad"],
-        ["filters-consumables"] = ["peugeot-2008-genuine-oil-filter", "peugeot-2008-active-carbon-cabin-filter"],
-        ["electrical-parts"] = ["peugeot-2008-508-spark-plug-set"],
-        ["body-lighting"] = [],
-        ["interior-accessories"] = []
-    };
-
-    public static bool TryGetPrimaryCategorySlug(string productSlug, out string categorySlug)
-    {
-        foreach (var entry in CategoryProductMap)
-        {
-            if (entry.Value.Contains(productSlug, StringComparer.OrdinalIgnoreCase))
-            {
-                categorySlug = entry.Key;
-                return true;
-            }
-        }
-
-        categorySlug = string.Empty;
-        return false;
-    }
-
-    public static IReadOnlyCollection<string> GetProductSlugsForCategory(string categorySlug, IReadOnlyList<CatalogCategoryNode> categories)
-    {
-        var slugs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var categorySlugs = GetDescendantSlugs(categorySlug, categories);
-        categorySlugs.Add(categorySlug);
-
-        foreach (var slug in categorySlugs)
-        {
-            if (!CategoryProductMap.TryGetValue(slug, out var products))
-            {
-                continue;
-            }
-
-            foreach (var productSlug in products)
-            {
-                slugs.Add(productSlug);
-            }
-        }
-
-        return slugs;
-    }
 
     public static IReadOnlyList<CatalogCategoryNode> BuildCategoryChain(
         IReadOnlyList<CatalogCategoryNode> categories,
@@ -129,33 +79,6 @@ public static class CatalogRoutingHelper
                && slug.EndsWith("-" + segment, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static HashSet<string> GetDescendantSlugs(string categorySlug, IReadOnlyList<CatalogCategoryNode> categories)
-    {
-        var descendants = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var category = categories.FirstOrDefault(item => item.Slug.Equals(categorySlug, StringComparison.OrdinalIgnoreCase));
-        if (category is null)
-        {
-            return descendants;
-        }
-
-        var queue = new Queue<CatalogCategoryNode>();
-        queue.Enqueue(category);
-
-        while (queue.Count > 0)
-        {
-            var current = queue.Dequeue();
-            var children = categories.Where(item => item.ParentId == current.Id).ToList();
-            foreach (var child in children)
-            {
-                if (descendants.Add(child.Slug))
-                {
-                    queue.Enqueue(child);
-                }
-            }
-        }
-
-        return descendants;
-    }
 }
 
 public sealed class CatalogCategoryNode

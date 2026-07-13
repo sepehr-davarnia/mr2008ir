@@ -62,6 +62,9 @@
                     <i class="bi bi-tags"></i>
                     <span>دسته‌بندی‌ها</span>
                 </a>
+                <a class="admin-nav-link @(currentController == "Vehicles" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Vehicles" asp-action="Index">
+                    <i class="bi bi-car-front"></i><span>خودروها و سازگاری</span>
+                </a>
                 <a class="admin-nav-link @(currentController == "Leads" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Leads" asp-action="Index">
                     <i class="bi bi-chat-dots"></i>
                     <span>درخواست‌ها</span>

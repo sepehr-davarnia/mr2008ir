@@ -32,6 +32,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(product => product.Description)
             .HasMaxLength(1000);
 
+        builder.Property(product => product.Brand).HasMaxLength(120);
+        builder.Property(product => product.Manufacturer).HasMaxLength(160);
+        builder.Property(product => product.OemPartNumber).HasMaxLength(120);
+        builder.Property(product => product.TechnicalPartNumber).HasMaxLength(120);
+        builder.Property(product => product.AlternatePartNumbers).HasMaxLength(500);
+        builder.HasIndex(product => product.OemPartNumber);
+        builder.HasIndex(product => product.TechnicalPartNumber);
+
         builder.Property(product => product.Status)
             .HasConversion<int>()
             .IsRequired();
@@ -71,5 +79,22 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                     join.HasKey("ProductId", "TagId");
                     join.HasIndex("TagId");
                 });
+
+        builder.HasMany(product => product.Categories)
+            .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "ProductCategory",
+                right => right.HasOne<Category>().WithMany().HasForeignKey("CategoryId").OnDelete(DeleteBehavior.Cascade),
+                left => left.HasOne<Product>().WithMany().HasForeignKey("ProductId").OnDelete(DeleteBehavior.Cascade),
+                join =>
+                {
+                    join.HasKey("ProductId", "CategoryId");
+                    join.HasIndex("CategoryId");
+                });
+
+        builder.HasMany(product => product.Compatibilities)
+            .WithOne()
+            .HasForeignKey(item => item.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
