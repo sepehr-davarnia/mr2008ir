@@ -13,6 +13,12 @@
 
 <section class="row g-4 mb-4">
     <div class="col-12 col-md-6 col-xl-4">
+        <a class="admin-card d-block text-decoration-none text-dark" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+            <div class="card-label">سفارش‌ها (در انتظار / کل)</div>
+            <div class="card-value">@Model.AwaitingOrdersCount / @Model.OrdersCount</div>
+        </a>
+    </div>
+    <div class="col-12 col-md-6 col-xl-4">
         <div class="admin-card">
             <div class="card-label">محصولات (منتشر شده / کل)</div>
             <div class="card-value">@Model.PublishedProductsCount / @Model.ProductsCount</div>
@@ -59,7 +65,7 @@
             <i class="bi bi-journal-plus"></i>
             ایجاد مطلب بلاگ
         </a>
-        <a class="btn btn-outline-secondary admin-action-btn" asp-area="" asp-page="/Index">
+        <a class="btn btn-outline-secondary admin-action-btn" asp-area="" asp-controller="Home" asp-action="Index">
             <i class="bi bi-box-arrow-up-right"></i>
             مشاهده سایت
         </a>

@@ -39,6 +39,31 @@
                 <span asp-validation-for="Price" class="text-danger small"></span>
             </div>
 
+            <div class="row g-3 mb-3">
+                <div class="col-md-6"><label asp-for="Brand" class="form-label"></label><input asp-for="Brand" class="form-control admin-input" /></div>
+                <div class="col-md-6"><label asp-for="Manufacturer" class="form-label"></label><input asp-for="Manufacturer" class="form-control admin-input" /></div>
+                <div class="col-md-6"><label asp-for="OemPartNumber" class="form-label"></label><input asp-for="OemPartNumber" class="form-control admin-input" dir="ltr" /></div>
+                <div class="col-md-6"><label asp-for="TechnicalPartNumber" class="form-label"></label><input asp-for="TechnicalPartNumber" class="form-control admin-input" dir="ltr" /></div>
+                <div class="col-12"><label asp-for="AlternatePartNumbers" class="form-label"></label><input asp-for="AlternatePartNumbers" class="form-control admin-input" dir="ltr" placeholder="کدها را با کاما جدا کنید" /></div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="CategoryIds" class="form-label"></label>
+                    <select asp-for="CategoryIds" class="form-select admin-input" size="6" multiple>
+                        @foreach (var option in Model.CategoryOptions) { <option value="@option.Id">@option.Label</option> }
+                    </select>
+                    <div class="form-text">برای انتخاب چند مورد، Ctrl یا Command را نگه دارید.</div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="VehicleIds" class="form-label"></label>
+                    <select asp-for="VehicleIds" class="form-select admin-input" size="6" multiple>
+                        @foreach (var option in Model.VehicleOptions) { <option value="@option.Id">@option.Label</option> }
+                    </select>
+                    <div class="form-check mt-2"><input asp-for="RequiresVinCheck" class="form-check-input" /><label asp-for="RequiresVinCheck" class="form-check-label"></label></div>
+                </div>
+            </div>
+
             <div class="mb-4">
                 <label asp-for="Status" class="form-label"></label>
                 <select asp-for="Status" class="form-select admin-input">

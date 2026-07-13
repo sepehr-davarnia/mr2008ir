@@ -117,14 +117,26 @@ public static class SeoHelper
             description = data.Description,
             image = data.ImageUrl,
             url = data.CanonicalUrl,
+            sku = data.Sku,
+            mpn = data.Mpn,
+            brand = string.IsNullOrWhiteSpace(data.Brand) ? null : new { @type = "Brand", name = data.Brand },
             offers = data.Price.HasValue
                 ? new
                 {
                     @type = "Offer",
                     price = data.Price.Value.ToString("0.##"),
                     priceCurrency = data.CurrencyCode ?? "IRR",
-                    availability = "https://schema.org/InStock",
-                    url = data.CanonicalUrl
+                    availability = data.AvailabilityUrl ?? "https://schema.org/InStock",
+                    itemCondition = data.ItemConditionUrl ?? "https://schema.org/NewCondition",
+                    url = data.CanonicalUrl,
+                    seller = new { @type = "Organization", name = "mr2008.ir" },
+                    hasMerchantReturnPolicy = string.IsNullOrWhiteSpace(data.ReturnPolicyUrl) ? null : new
+                    {
+                        @type = "MerchantReturnPolicy",
+                        applicableCountry = "IR",
+                        returnPolicyCategory = "https://schema.org/MerchantReturnUnspecified",
+                        merchantReturnLink = data.ReturnPolicyUrl
+                    }
                 }
                 : null
         }, JsonOptions);
@@ -192,6 +204,12 @@ public sealed class SeoProductSchemaData
     public string? ImageUrl { get; init; }
     public decimal? Price { get; init; }
     public string? CurrencyCode { get; init; }
+    public string? Sku { get; init; }
+    public string? Mpn { get; init; }
+    public string? Brand { get; init; }
+    public string? AvailabilityUrl { get; init; }
+    public string? ItemConditionUrl { get; init; }
+    public string? ReturnPolicyUrl { get; init; }
 }
 
 public sealed class SeoBreadcrumbItem

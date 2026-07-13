@@ -18,6 +18,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = "mr2008.cart";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.IdleTimeout = TimeSpan.FromDays(14);
+});
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICartViewModelBuilder, CartViewModelBuilder>();
+builder.Services.Configure<ZarinpalOptions>(builder.Configuration.GetSection(ZarinpalOptions.Section));
+builder.Services.AddHttpClient<IPaymentGateway, ZarinpalPaymentGateway>(client => client.Timeout = TimeSpan.FromSeconds(30));
 builder.Services.AddHttpClient("external-media", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(30);
@@ -44,6 +59,20 @@ builder.Services.AddRateLimiter(options =>
     options.AddFixedWindowLimiter("contact", limiter =>
     {
         limiter.PermitLimit = 5;
+        limiter.Window = TimeSpan.FromMinutes(10);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+    options.AddFixedWindowLimiter("checkout", limiter =>
+    {
+        limiter.PermitLimit = 5;
+        limiter.Window = TimeSpan.FromMinutes(10);
+        limiter.QueueLimit = 0;
+        limiter.AutoReplenishment = true;
+    });
+    options.AddFixedWindowLimiter("order-tracking", limiter =>
+    {
+        limiter.PermitLimit = 8;
         limiter.Window = TimeSpan.FromMinutes(10);
         limiter.QueueLimit = 0;
         limiter.AutoReplenishment = true;
@@ -120,6 +149,7 @@ app.Use(async (context, next) =>
 });
 
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

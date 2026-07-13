@@ -1,0 +1,4 @@
+@model Atelier.Web.Areas.Admin.ViewModels.VehicleEditViewModel
+@{ Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml"; ViewData["Title"] = "خودروی جدید"; }
+<div class="container-fluid py-4" dir="rtl"><div class="admin-form-card"><form method="post"><partial name="_Form" model="Model" /></form></div></div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

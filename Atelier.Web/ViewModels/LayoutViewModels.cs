@@ -10,6 +10,7 @@ public class LayoutViewModel
     public string? FaviconUrl { get; set; }
     public string? Address { get; set; }
     public string? Phone { get; set; }
+    public string? WhatsApp { get; set; }
     public string? Email { get; set; }
     public IReadOnlyList<NavigationLinkViewModel> PrimaryLinks { get; set; } = new List<NavigationLinkViewModel>();
     public IReadOnlyList<NavigationLinkViewModel> CategoryLinks { get; set; } = new List<NavigationLinkViewModel>();

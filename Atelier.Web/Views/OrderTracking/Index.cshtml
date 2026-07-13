@@ -1,0 +1,8 @@
+@model Atelier.Web.ViewModels.OrderTrackingLookupViewModel
+@{ ViewData["Title"] = "پیگیری سفارش"; }
+<main class="section-shell tracking-shell" dir="rtl"><section class="tracking-card reveal"><span class="eyebrow">پیگیری امن</span><h1>سفارش شما در چه مرحله‌ای است؟</h1><p>شماره سفارش و موبایلی که هنگام خرید ثبت کرده‌اید وارد کنید.</p>
+<form method="post" asp-action="Lookup" class="tracking-form">@Html.AntiForgeryToken()<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<label asp-for="OrderNumber"></label><input asp-for="OrderNumber" dir="ltr" autocomplete="off" placeholder="MR-20260713-..." /><span asp-validation-for="OrderNumber"></span>
+<label asp-for="Phone"></label><input asp-for="Phone" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="0912..." /><span asp-validation-for="Phone"></span>
+<button class="btn-primary-premium" type="submit">مشاهده وضعیت سفارش</button></form></section></main>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

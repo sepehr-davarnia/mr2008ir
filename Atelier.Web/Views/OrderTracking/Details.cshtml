@@ -1,0 +1,9 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.OrderTrackingViewModel
+@{ ViewData["Title"] = "وضعیت سفارش"; var layout = ViewData["Layout"] as Atelier.Web.ViewModels.LayoutViewModel ?? new(); var phoneHref = "tel:" + new string((layout.Phone ?? string.Empty).Where(c => char.IsDigit(c) || c == '+').ToArray()); }
+<main class="section-shell tracking-shell" dir="rtl"><section class="tracking-card reveal"><div class="tracking-heading"><div><span class="eyebrow">شماره سفارش</span><h1 dir="ltr">@Model.Number</h1></div><span class="payment-badge">پرداخت: @(Model.PaymentStatus == Atelier.Domain.Enums.PaymentStatus.Paid ? "تأیید شده" : "تکمیل نشده")</span></div>
+<div class="tracking-summary"><div><span>مقصد</span><strong>@Model.Destination</strong></div><div><span>مبلغ</span><strong>@LocalizationHelper.FormatPrice(Model.Total, Atelier.Domain.Enums.PriceType.Fixed)</strong></div></div>
+@if (!string.IsNullOrWhiteSpace(Model.TrackingNumber)) { <div class="order-reference"><span>@(Model.Carrier ?? "کد رهگیری مرسوله")</span><strong dir="ltr">@Model.TrackingNumber</strong><button type="button" data-copy="@Model.TrackingNumber">کپی</button></div> }
+<ol class="tracking-timeline">@foreach (var step in Model.Timeline) { <li><span class="timeline-dot"></span><div><strong>@step.Label</strong><time>@step.Date.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</time>@if (!string.IsNullOrWhiteSpace(step.Note)) { <p>@step.Note</p> }</div></li> }</ol>
+<h2>اقلام سفارش</h2><div class="tracking-items">@foreach (var item in Model.Items) { <div><span>@item.Name × @item.Quantity</span><strong>@LocalizationHelper.FormatPrice(item.LineTotal, Atelier.Domain.Enums.PriceType.Fixed)</strong></div> }</div>
+<a class="btn-primary-premium" href="@phoneHref">تماس با فروشگاه</a></section></main>

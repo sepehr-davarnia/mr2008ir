@@ -39,6 +39,44 @@ public abstract class ProductFormViewModel
     [Display(Name = "قیمت (تومان)")]
     [Range(0, 1_000_000_000, ErrorMessage = "قیمت نمی‌تواند منفی باشد.")]
     public decimal? Price { get; set; }
+
+    [Display(Name = "برند")]
+    [StringLength(120)]
+    public string? Brand { get; set; }
+
+    [Display(Name = "سازنده")]
+    [StringLength(160)]
+    public string? Manufacturer { get; set; }
+
+    [Display(Name = "شماره OEM")]
+    [StringLength(120)]
+    public string? OemPartNumber { get; set; }
+
+    [Display(Name = "کد فنی")]
+    [StringLength(120)]
+    public string? TechnicalPartNumber { get; set; }
+
+    [Display(Name = "کدهای جایگزین")]
+    [StringLength(500)]
+    public string? AlternatePartNumbers { get; set; }
+
+    [Display(Name = "دسته‌بندی‌ها")]
+    public List<int> CategoryIds { get; set; } = new();
+
+    [Display(Name = "خودروهای سازگار")]
+    public List<int> VehicleIds { get; set; } = new();
+
+    [Display(Name = "نیاز به تأیید VIN")]
+    public bool RequiresVinCheck { get; set; }
+
+    public IReadOnlyList<SelectOptionViewModel> CategoryOptions { get; set; } = Array.Empty<SelectOptionViewModel>();
+    public IReadOnlyList<SelectOptionViewModel> VehicleOptions { get; set; } = Array.Empty<SelectOptionViewModel>();
+}
+
+public class SelectOptionViewModel
+{
+    public int Id { get; set; }
+    public string Label { get; set; } = string.Empty;
 }
 
 public class ProductCreateViewModel : ProductFormViewModel

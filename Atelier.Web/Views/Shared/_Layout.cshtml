@@ -1,5 +1,6 @@
 @using Atelier.Web.Services
 @using Atelier.Web.ViewModels
+@inject ICartService Cart
 @{
     var layout = ViewData["Layout"] as LayoutViewModel ?? new LayoutViewModel();
     var title = ViewData["MetaTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? layout.SiteName;
@@ -45,9 +46,9 @@
     <div class="container-xxl site-header__inner">
         <a class="wordmark" href="/" aria-label="صفحه اصلی mr2008.ir"><span>MR</span><b>2008</b><small>.IR</small></a>
         <nav class="primary-nav" id="primary-navigation" aria-label="منوی اصلی">
-            <a href="/categories">فروشگاه قطعات</a><a href="/engine-parts">قطعات موتور</a><a href="/filters-consumables">لوازم مصرفی</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a>
+            <a href="/categories">فروشگاه قطعات</a><a href="/engine-parts">قطعات موتور</a><a href="/filters-consumables">لوازم مصرفی</a><a href="/order-tracking">پیگیری سفارش</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a>
         </nav>
-        <div class="header-actions"><a class="header-search" href="/categories#catalogQuery" aria-label="جست‌وجو">⌕</a><a class="header-consult" href="/pages/contact-us">مشاوره خرید</a><button class="nav-toggle" type="button" aria-label="نمایش منو" aria-controls="primary-navigation" aria-expanded="false">☰</button></div>
+        <div class="header-actions"><a class="header-search" href="/categories#catalogQuery" aria-label="جست‌وجو">⌕</a><a class="header-cart" href="/cart" aria-label="سبد خرید، @Cart.Count کالا"><span aria-hidden="true">◌</span><b class="@(Cart.Count == 0 ? "d-none" : string.Empty)" data-cart-count>@Cart.Count</b></a><a class="header-consult" href="/pages/contact-us">مشاوره خرید</a><button class="nav-toggle" type="button" aria-label="نمایش منو" aria-controls="primary-navigation" aria-expanded="false">☰</button></div>
     </div>
 </header>
 <main class="site-main" id="main-content">@RenderBody()</main>
@@ -55,11 +56,12 @@
     <div class="container-xxl footer-grid">
         <div><a class="wordmark wordmark--footer" href="/"><span>MR</span><b>2008</b><small>.IR</small></a><p>مرجع تخصصی انتخاب و خرید قطعات پژو ۲۰۰۸؛ با تمرکز بر اصالت، مشاوره فنی و تجربه خرید مطمئن.</p></div>
         <div><h3>دسترسی سریع</h3><a href="/categories">فروشگاه</a><a href="/blog">راهنمای خرید</a><a href="/pages/about-us">درباره ما</a></div>
-        <div><h3>خدمات مشتریان</h3><a href="/pages/contact-us">تماس با ما</a><a href="/pages/faq">سؤالات متداول</a><a href="/pages/contact-us">استعلام قطعه</a></div>
+        <div><h3>خدمات مشتریان</h3><a href="/order-tracking">پیگیری سفارش</a><a href="/pages/contact-us">تماس با ما</a><a href="/pages/faq">سؤالات متداول</a><a href="/pages/shipping-returns">ارسال و بازگشت</a><a href="/pages/terms">شرایط خرید</a><a href="/pages/privacy">حریم خصوصی</a></div>
         <div><h3>اطلاعات تماس</h3><span>@layout.Phone</span><span>@layout.Email</span><span>@layout.Address</span></div>
     </div>
     <div class="container-xxl footer-bottom"><span>© @DateTime.Now.Year mr2008.ir</span><span>انتخاب مطمئن برای پژو ۲۰۰۸</span></div>
 </footer>
+<div class="cart-toast" role="status" aria-live="polite" data-cart-toast></div>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body></html>

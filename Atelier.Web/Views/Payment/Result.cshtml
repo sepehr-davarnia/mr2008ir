@@ -1,0 +1,7 @@
+@model Atelier.Web.ViewModels.PaymentResultViewModel
+@{ ViewData["Title"] = "نتیجه پرداخت"; var layout = ViewData["Layout"] as Atelier.Web.ViewModels.LayoutViewModel ?? new(); var phoneHref = "tel:" + new string((layout.Phone ?? string.Empty).Where(c => char.IsDigit(c) || c == '+').ToArray()); }
+<main class="section-shell commerce-result" dir="rtl">
+    <div class="commerce-result-card"><span class="eyebrow">سفارش @Model.OrderNumber</span><h1>پرداخت تکمیل نشد</h1><p>@Model.Message</p>
+        <div class="success-actions"><form method="post" asp-action="Retry" asp-route-token="@Model.PublicToken">@Html.AntiForgeryToken()<button class="btn-primary-premium" type="submit">تلاش دوباره برای پرداخت</button></form><a class="commerce-link" href="@phoneHref">تماس با فروشگاه</a><a class="commerce-link" asp-controller="OrderTracking" asp-action="Details" asp-route-token="@Model.PublicToken">پیگیری سفارش</a></div>
+    </div>
+</main>

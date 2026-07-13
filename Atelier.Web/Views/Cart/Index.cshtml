@@ -1,0 +1,75 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "سبد خرید";
+}
+
+<div class="container-xxl commerce-shell">
+    <div class="commerce-heading reveal">
+        <span class="eyebrow">سبد خرید</span>
+        <h1>انتخاب‌های شما</h1>
+        <p>قیمت و موجودی نهایی پیش از ارسال توسط کارشناس تأیید می‌شود.</p>
+    </div>
+
+    @if (TempData["CartMessage"] is string message)
+    {
+        <div class="commerce-alert" role="status">✓ @message</div>
+    }
+
+    @if (!Model.Items.Any())
+    {
+        <section class="commerce-empty reveal">
+            <div class="commerce-empty__icon">＋</div>
+            <h2>سبد خرید شما خالی است</h2>
+            <p>قطعه موردنیازتان را پیدا کنید؛ اگر مطمئن نیستید، قبل از خرید با کارشناس صحبت کنید.</p>
+            <div><a class="btn-primary-premium" href="/categories">مشاهده فروشگاه</a><a class="commerce-link" href="/pages/contact-us">مشاوره خرید</a></div>
+        </section>
+    }
+    else
+    {
+        <div class="commerce-grid">
+            <section class="cart-list" aria-label="محصولات سبد خرید">
+                @foreach (var item in Model.Items)
+                {
+                    <article class="cart-item reveal">
+                        <a href="@item.Url" class="cart-item__media">
+                            @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                            {
+                                <img src="@(ImageHelper.BuildResizedUrl(item.ImageUrl, 360) ?? item.ImageUrl)" alt="@item.Name" />
+                            }
+                        </a>
+                        <div class="cart-item__content">
+                            <div><span class="cart-item__fit">مناسب پژو ۲۰۰۸</span><h2><a href="@item.Url">@item.Name</a></h2><b>@LocalizationHelper.FormatPrice(item.UnitPrice, Atelier.Domain.Enums.PriceType.Fixed)</b></div>
+                            <div class="cart-item__actions">
+                                <form method="post" action="/cart/update" class="quantity-control">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <label class="visually-hidden" for="quantity-@item.ProductId">تعداد</label>
+                                    <select id="quantity-@item.ProductId" name="quantity" onchange="this.form.submit()">
+                                        @for (var quantity = 1; quantity <= 10; quantity++)
+                                        {
+                                            <option value="@quantity" selected="@(quantity == item.Quantity)">@quantity</option>
+                                        }
+                                    </select>
+                                </form>
+                                <form method="post" action="/cart/remove">
+                                    @Html.AntiForgeryToken()<input type="hidden" name="productId" value="@item.ProductId" />
+                                    <button type="submit" class="cart-remove">حذف</button>
+                                </form>
+                            </div>
+                        </div>
+                        <strong class="cart-item__total">@LocalizationHelper.FormatPrice(item.LineTotal, Atelier.Domain.Enums.PriceType.Fixed)</strong>
+                    </article>
+                }
+            </section>
+            <aside class="order-summary reveal" aria-label="خلاصه سفارش">
+                <h2>خلاصه سفارش</h2>
+                <div><span>تعداد کالا</span><b>@Model.TotalQuantity</b></div>
+                <div><span>هزینه ارسال</span><b>پس از تأیید مقصد</b></div>
+                <div class="order-summary__total"><span>جمع کالاها</span><strong>@LocalizationHelper.FormatPrice(Model.Total, Atelier.Domain.Enums.PriceType.Fixed)</strong></div>
+                <a class="checkout-button" href="/checkout">ادامه و ثبت سفارش <span>←</span></a>
+                <div class="summary-trust"><span>✓ بررسی سازگاری قطعه</span><span>✓ تأیید موجودی پیش از پرداخت</span><span>✓ پشتیبانی انسانی</span></div>
+            </aside>
+        </div>
+    }
+</div>

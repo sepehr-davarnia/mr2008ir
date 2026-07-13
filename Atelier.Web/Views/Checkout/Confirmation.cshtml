@@ -1,0 +1,18 @@
+@using Atelier.Web.Services
+@model Atelier.Web.ViewModels.OrderConfirmationViewModel
+@{
+    ViewData["Title"] = "سفارش ثبت شد";
+}
+
+<div class="container-xxl commerce-shell">
+    <section class="order-success reveal">
+        <div class="success-check" aria-hidden="true">✓</div>
+        <span class="eyebrow">پرداخت تأیید شد</span>
+        <h1>متشکریم؛ سفارش شما با موفقیت ثبت شد.</h1>
+        <p>پرداخت امن تأیید شد. وضعیت آماده‌سازی و ارسال را هر زمان از صفحه پیگیری سفارش ببینید.</p>
+        <div class="order-reference"><span>شماره پیگیری</span><strong dir="ltr">@Model.OrderNumber</strong><button type="button" data-copy="@Model.OrderNumber">کپی</button></div>
+        <p class="order-success__total">جمع کالاها: <strong>@LocalizationHelper.FormatPrice(Model.Total, Atelier.Domain.Enums.PriceType.Fixed)</strong></p>
+        <div class="success-steps"><div><b>۱</b><span>پرداخت تأیید شد</span></div><div><b>۲</b><span>بررسی فنی قطعه</span></div><div><b>۳</b><span>آماده‌سازی و ارسال</span></div></div>
+        <div class="success-actions"><a class="btn-primary-premium" asp-controller="OrderTracking" asp-action="Details" asp-route-token="@Model.PublicToken">پیگیری سفارش</a><a class="commerce-link" href="/categories">ادامه خرید</a></div>
+    </section>
+</div>

@@ -38,6 +38,10 @@
                     <i class="bi bi-box-seam"></i>
                     <span>محصولات</span>
                 </a>
+                <a class="admin-nav-link @(currentController == "Orders" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                    <i class="bi bi-bag-check"></i>
+                    <span>سفارش‌ها</span>
+                </a>
                 <a class="admin-nav-link @(currentController == "Products" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Products" asp-action="Pricing">
                     <i class="bi bi-cash-coin"></i>
                     <span>مدیریت قیمت‌ها</span>
@@ -57,6 +61,9 @@
                 <a class="admin-nav-link @(currentController == "Categories" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Categories" asp-action="Index">
                     <i class="bi bi-tags"></i>
                     <span>دسته‌بندی‌ها</span>
+                </a>
+                <a class="admin-nav-link @(currentController == "Vehicles" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Vehicles" asp-action="Index">
+                    <i class="bi bi-car-front"></i><span>خودروها و سازگاری</span>
                 </a>
                 <a class="admin-nav-link @(currentController == "Leads" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Leads" asp-action="Index">
                     <i class="bi bi-chat-dots"></i>

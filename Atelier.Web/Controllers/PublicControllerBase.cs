@@ -119,6 +119,7 @@ public abstract class PublicControllerBase : Controller
             FaviconUrl = faviconUrl,
             Address = settings?.Address,
             Phone = settings?.Phone ?? settings?.Mobile,
+            WhatsApp = settings?.WhatsApp,
             Email = settings?.Email,
             PrimaryLinks = primaryLinks,
             CategoryLinks = categoryLinks,

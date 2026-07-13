@@ -59,9 +59,11 @@ public class ProductsController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View(new ProductCreateViewModel());
+        var model = new ProductCreateViewModel();
+        await PopulateProductOptionsAsync(model);
+        return View(model);
     }
 
     [HttpPost]
@@ -70,6 +72,7 @@ public class ProductsController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await PopulateProductOptionsAsync(model);
             return View(model);
         }
 
@@ -77,10 +80,14 @@ public class ProductsController : Controller
         if (slug is null)
         {
             ModelState.AddModelError(nameof(model.Slug), "این اسلاگ قبلاً استفاده شده است.");
+            await PopulateProductOptionsAsync(model);
             return View(model);
         }
 
         var product = new Product(model.Name, slug, model.Description);
+        product.UpdateCommerceDetails(model.Brand, model.Manufacturer, model.OemPartNumber, model.TechnicalPartNumber, model.AlternatePartNumbers);
+        product.SetCategories(await _dbContext.Categories.Where(item => model.CategoryIds.Contains(item.Id)).ToListAsync());
+        product.SetCompatibilities(await BuildCompatibilitiesAsync(model.VehicleIds, model.RequiresVinCheck));
         product.SetPrice(model.Price);
         ApplyStatus(product, model.Status);
 
@@ -110,6 +117,8 @@ public class ProductsController : Controller
     {
         var product = await _dbContext.Products
             .Include(p => p.Gallery)
+            .Include(p => p.Categories)
+            .Include(p => p.Compatibilities)
             .FirstOrDefaultAsync(p => p.Id == model.Id);
 
         if (product is null)
@@ -128,6 +137,7 @@ public class ProductsController : Controller
                     ContentType = media.ContentType
                 })
                 .ToList();
+            await PopulateProductOptionsAsync(model);
             return View(model);
         }
 
@@ -144,10 +154,14 @@ public class ProductsController : Controller
                     ContentType = media.ContentType
                 })
                 .ToList();
+            await PopulateProductOptionsAsync(model);
             return View(model);
         }
 
         product.UpdateDetails(model.Name, model.Description);
+        product.UpdateCommerceDetails(model.Brand, model.Manufacturer, model.OemPartNumber, model.TechnicalPartNumber, model.AlternatePartNumbers);
+        product.SetCategories(await _dbContext.Categories.Where(item => model.CategoryIds.Contains(item.Id)).ToListAsync());
+        product.SetCompatibilities(await BuildCompatibilitiesAsync(model.VehicleIds, model.RequiresVinCheck));
         product.SetPrice(model.Price);
         ApplyStatus(product, model.Status);
 
@@ -165,6 +179,8 @@ public class ProductsController : Controller
     {
         var product = await _dbContext.Products
             .Include(p => p.Gallery)
+            .Include(p => p.Categories)
+            .Include(p => p.Compatibilities)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (product is null)
@@ -186,6 +202,7 @@ public class ProductsController : Controller
     {
         var product = await _dbContext.Products
             .Include(p => p.Gallery)
+            .Include(p => p.Categories)
             .FirstOrDefaultAsync(p => p.Id == productId);
 
         if (product is null)
@@ -401,6 +418,8 @@ public class ProductsController : Controller
     {
         var product = await _dbContext.Products
             .Include(p => p.Gallery)
+            .Include(p => p.Categories)
+            .Include(p => p.Compatibilities)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -409,7 +428,7 @@ public class ProductsController : Controller
             return null;
         }
 
-        return new ProductEditViewModel
+        var model = new ProductEditViewModel
         {
             Id = product.Id,
             Name = product.Name,
@@ -417,6 +436,14 @@ public class ProductsController : Controller
             Description = product.Description,
             Status = product.Status,
             Price = product.Price,
+            Brand = product.Brand,
+            Manufacturer = product.Manufacturer,
+            OemPartNumber = product.OemPartNumber,
+            TechnicalPartNumber = product.TechnicalPartNumber,
+            AlternatePartNumbers = product.AlternatePartNumbers,
+            CategoryIds = product.Categories.Select(item => item.Id).ToList(),
+            VehicleIds = product.Compatibilities.Select(item => item.VehicleId).ToList(),
+            RequiresVinCheck = product.Compatibilities.Any(item => item.RequiresVinCheck),
             Gallery = product.Gallery
                 .Select(media => new MediaItemViewModel
                 {
@@ -427,6 +454,31 @@ public class ProductsController : Controller
                 })
                 .ToList()
         };
+
+        await PopulateProductOptionsAsync(model);
+        return model;
+    }
+
+    private async Task PopulateProductOptionsAsync(ProductFormViewModel model)
+    {
+        model.CategoryOptions = await _dbContext.Categories.AsNoTracking().OrderBy(item => item.Name)
+            .Select(item => new SelectOptionViewModel { Id = item.Id, Label = item.Name }).ToListAsync();
+        model.VehicleOptions = await _dbContext.Vehicles.AsNoTracking().Where(item => item.IsActive)
+            .OrderBy(item => item.Make).ThenBy(item => item.Model).ThenBy(item => item.YearFrom)
+            .Select(item => new SelectOptionViewModel
+            {
+                Id = item.Id,
+                Label = item.Make + " " + item.Model + " | " + item.YearFrom + "-" + (item.YearTo ?? item.YearFrom) + " | " + item.Engine + " | " + item.Trim
+            }).ToListAsync();
+    }
+
+    private async Task<List<ProductCompatibility>> BuildCompatibilitiesAsync(IEnumerable<int> vehicleIds, bool requiresVinCheck)
+    {
+        var ids = vehicleIds.Distinct().ToArray();
+        var validIds = await _dbContext.Vehicles.AsNoTracking().Where(item => ids.Contains(item.Id) && item.IsActive)
+            .Select(item => item.Id).ToListAsync();
+        return validIds.Select(id => new ProductCompatibility(id, requiresVinCheck,
+            requiresVinCheck ? "تطبیق با VIN پیش از ارسال الزامی است." : null)).ToList();
     }
 
     private static void ApplyStatus(Product product, ProductStatus status)
