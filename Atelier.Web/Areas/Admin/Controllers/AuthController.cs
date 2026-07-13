@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Atelier.Web.Areas.Admin.Controllers;
 
@@ -26,6 +27,8 @@ public class AuthController : Controller
 
     [HttpPost]
     [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting("admin-login")]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
@@ -65,6 +68,8 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
