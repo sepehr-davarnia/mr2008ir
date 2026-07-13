@@ -73,7 +73,7 @@ public class BlogController : PublicControllerBase
         ViewData["PageSchema"] = SeoHelper.BuildPageSchema(new SeoPageSchemaData
         {
             Type = SeoPageSchemaType.WebPage,
-            Title = "بلاگ آتلیه وود",
+            Title = "راهنمای خرید و نگهداری پژو ۲۰۰۸ | mr2008.ir",
             Description = "راهنمای تخصصی انتخاب قطعات، نگهداری و خرید مطمئن لوازم پژو ۲۰۰۸.",
             CanonicalUrl = canonicalUrl ?? string.Empty
         });
