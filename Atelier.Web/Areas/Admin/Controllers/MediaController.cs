@@ -26,10 +26,12 @@ public class MediaController : Controller
     ];
 
     private readonly AtelierDbContext _dbContext;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public MediaController(AtelierDbContext dbContext)
+    public MediaController(AtelierDbContext dbContext, IHttpClientFactory httpClientFactory)
     {
         _dbContext = dbContext;
+        _httpClientFactory = httpClientFactory;
     }
 
     [HttpGet]
@@ -173,6 +175,7 @@ public class MediaController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Serve(int mediaId, int? width = null, int? height = null, string? format = null)
     {
         var media = await _dbContext.Media
@@ -228,6 +231,55 @@ public class MediaController : Controller
         image.Save(output, encoder);
         output.Position = 0;
         return File(output.ToArray(), mimeType);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportExternalImages(CancellationToken cancellationToken)
+    {
+        const int maxBytes = 10 * 1024 * 1024;
+        var candidates = await _dbContext.Media
+            .Where(media => media.StorageId == null && media.Purpose == "محصول" &&
+                (media.Url.StartsWith("https://www.partonlineco.com/") || media.Url.StartsWith("https://partonlineco.com/")))
+            .OrderBy(media => media.Id).Take(50).ToListAsync(cancellationToken);
+        var client = _httpClientFactory.CreateClient("external-media");
+        var imported = 0;
+        var failed = 0;
+
+        foreach (var media in candidates)
+        {
+            try
+            {
+                using var response = await client.GetAsync(media.Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                var contentType = response.Content.Headers.ContentType?.MediaType;
+                if (contentType is null || !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                    response.Content.Headers.ContentLength > maxBytes) throw new InvalidOperationException("Invalid remote image.");
+
+                var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                if (bytes.Length == 0 || bytes.Length > maxBytes) throw new InvalidOperationException("Invalid image size.");
+
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+                var stored = new MediaContent { Data = bytes };
+                _dbContext.MediaContents.Add(stored);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                media.AttachStoredContent(stored.Id, contentType, bytes.LongLength,
+                    $"/Admin/Media/Serve?mediaId={media.Id}");
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                imported++;
+            }
+            catch
+            {
+                await _dbContext.Entry(media).ReloadAsync(cancellationToken);
+                media.UpdateDownloadStatus(true);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                failed++;
+            }
+        }
+
+        TempData["SuccessMessage"] = $"{imported} تصویر در پایگاه داده ذخیره شد. {failed} مورد ناموفق بود.";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]
