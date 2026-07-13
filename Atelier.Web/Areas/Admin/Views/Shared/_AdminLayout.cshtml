@@ -52,7 +52,7 @@
                 </a>
                 <a class="admin-nav-link @(currentController == "Projects" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Projects" asp-action="Index">
                     <i class="bi bi-lightning-charge"></i>
-                    <span>پروژه‌ها</span>
+                    <span>خدمات فنی</span>
                 </a>
                 <a class="admin-nav-link @(currentController == "Categories" ? "active" : string.Empty)" asp-area="Admin" asp-controller="Categories" asp-action="Index">
                     <i class="bi bi-tags"></i>
@@ -73,10 +73,13 @@
             </nav>
 
             <div class="admin-logout">
-                <a class="admin-nav-link text-danger" asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+                <form asp-area="Admin" asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="admin-nav-link text-danger border-0 bg-transparent w-100" type="submit">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>خروج</span>
-                </a>
+                    </button>
+                </form>
             </div>
         </aside>
 
@@ -86,10 +89,13 @@
                     <h1 class="admin-page-title">@pageTitle</h1>
                     <p class="admin-page-subtitle">مدیریت حرفه‌ای محصولات و تنظیمات کسب‌وکار شما</p>
                 </div>
-                <a class="btn btn-outline-danger admin-logout-button" asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+                <form asp-area="Admin" asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-outline-danger admin-logout-button" type="submit">
                     خروج
                     <i class="bi bi-box-arrow-left"></i>
-                </a>
+                    </button>
+                </form>
             </header>
 
             <main class="admin-content">
