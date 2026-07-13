@@ -12,79 +12,79 @@ public class SitemapController : Controller
 {
     private readonly AtelierDbContext _dbContext;
 
-    public SitemapController(AtelierDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    public SitemapController(AtelierDbContext dbContext) => _dbContext = dbContext;
 
     [HttpGet("/sitemap.xml")]
+    [ResponseCache(Duration = 3600)]
     public async Task<IActionResult> Index()
     {
-        var blogPosts = await _dbContext.BlogPosts
-            .AsNoTracking()
+        var categories = await _dbContext.Categories.AsNoTracking()
+            .Select(category => new CatalogCategoryNode
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Slug = category.Slug,
+                ParentId = EF.Property<int?>(category, "ParentId"),
+                MediaId = category.MediaId,
+                UpdatedAt = category.UpdatedAt ?? category.CreatedAt
+            }).ToListAsync();
+
+        var products = await _dbContext.Products.AsNoTracking()
+            .Where(product => product.Status == ProductStatus.Published)
+            .Select(product => new { product.Slug, product.UpdatedAt, product.CreatedAt })
+            .ToListAsync();
+        var posts = await _dbContext.BlogPosts.AsNoTracking()
             .Where(post => post.PublishedAt != null)
-            .Select(post => new { post.Slug, post.UpdatedAt, post.PublishedAt })
-            .ToListAsync();
-
-        var pages = await _dbContext.Pages
-            .AsNoTracking()
+            .Select(post => new { post.Slug, post.UpdatedAt, post.PublishedAt }).ToListAsync();
+        var pages = await _dbContext.Pages.AsNoTracking()
             .Where(page => page.Status == PageStatus.Published)
-            .Select(page => new { page.Slug, page.UpdatedAt, page.CreatedAt })
-            .ToListAsync();
+            .Select(page => new { page.Slug, page.UpdatedAt, page.CreatedAt }).ToListAsync();
 
-        var projects = await _dbContext.Projects
-            .AsNoTracking()
-            .Where(project => project.IsPublished)
-            .Select(project => new { project.Slug, project.UpdatedAt, project.CreatedAt })
-            .ToListAsync();
-
-        var basePath = Request.PathBase.Add("/").ToString().TrimEnd('/');
-        var baseUrl = SeoHelper.BuildAbsoluteUrl(Request, basePath);
-
-        var urls = new List<SitemapUrl>();
-        urls.AddRange(blogPosts.Select(post => new SitemapUrl
+        var baseUrl = SeoHelper.BuildAbsoluteUrl(Request, Request.PathBase.Add("/").ToString().TrimEnd('/'));
+        var urls = new List<SitemapUrl>
         {
-            Location = Url.Action("Details", "Blog", new { slug = post.Slug }, Request.Scheme) ?? string.Empty,
-            LastModified = post.UpdatedAt ?? post.PublishedAt?.UtcDateTime,
-            ChangeFrequency = "weekly",
-            Priority = "0.6"
-        }));
+            new(baseUrl + "/", null, "daily", "1.0"),
+            new(baseUrl + "/categories", null, "daily", "0.9"),
+            new(baseUrl + "/blog", null, "weekly", "0.7")
+        };
 
-        urls.AddRange(pages.Select(page => new SitemapUrl
+        urls.AddRange(categories.Select(category => new SitemapUrl(
+            baseUrl + CatalogRoutingHelper.BuildCategoryPath(categories, category),
+            category.UpdatedAt, "weekly", "0.8")));
+
+        foreach (var product in products)
         {
-            Location = string.Concat(baseUrl, "/pages/", page.Slug),
-            LastModified = page.UpdatedAt ?? page.CreatedAt,
-            ChangeFrequency = "monthly",
-            Priority = "0.5"
-        }));
+            if (!CatalogRoutingHelper.TryGetPrimaryCategorySlug(product.Slug, out var categorySlug)) continue;
+            var category = categories.FirstOrDefault(item => item.Slug == categorySlug);
+            if (category is null) continue;
+            var chain = CatalogRoutingHelper.BuildCategoryChain(categories, category);
+            urls.Add(new SitemapUrl(baseUrl + CatalogRoutingHelper.BuildProductPath(chain, product.Slug),
+                product.UpdatedAt ?? product.CreatedAt, "weekly", "0.8"));
+        }
 
-        urls.AddRange(projects.Select(project => new SitemapUrl
-        {
-            Location = string.Concat(baseUrl, "/projects/", project.Slug),
-            LastModified = project.UpdatedAt ?? project.CreatedAt,
-            ChangeFrequency = "monthly",
-            Priority = "0.5"
-        }));
+        urls.AddRange(posts.Select(post => new SitemapUrl(baseUrl + "/blog/" + post.Slug,
+            post.UpdatedAt ?? post.PublishedAt?.UtcDateTime, "weekly", "0.6")));
+        urls.AddRange(pages.Select(page => new SitemapUrl(baseUrl + "/pages/" + page.Slug,
+            page.UpdatedAt ?? page.CreatedAt, "monthly", "0.5")));
 
-        var sitemap = new XDocument(
-            new XElement("urlset",
-                new XAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"),
-                urls.Where(url => !string.IsNullOrWhiteSpace(url.Location)).Select(url =>
-                    new XElement("url",
-                        new XElement("loc", url.Location),
-                        url.LastModified.HasValue ? new XElement("lastmod", url.LastModified.Value.ToString("yyyy-MM-dd")) : null,
-                        new XElement("changefreq", url.ChangeFrequency),
-                        new XElement("priority", url.Priority))
-                )));
-
+        XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
+        var sitemap = new XDocument(new XElement(ns + "urlset",
+            urls.Where(item => !string.IsNullOrWhiteSpace(item.Location)).DistinctBy(item => item.Location).Select(item =>
+                new XElement(ns + "url",
+                    new XElement(ns + "loc", item.Location),
+                    item.LastModified.HasValue ? new XElement(ns + "lastmod", item.LastModified.Value.ToString("yyyy-MM-dd")) : null,
+                    new XElement(ns + "changefreq", item.ChangeFrequency),
+                    new XElement(ns + "priority", item.Priority)))));
         return Content(sitemap.ToString(SaveOptions.DisableFormatting), "application/xml", Encoding.UTF8);
     }
 
-    private sealed class SitemapUrl
+    [HttpGet("/robots.txt")]
+    [ResponseCache(Duration = 3600)]
+    public IActionResult Robots()
     {
-        public string Location { get; init; } = string.Empty;
-        public DateTime? LastModified { get; init; }
-        public string ChangeFrequency { get; init; } = "monthly";
-        public string Priority { get; init; } = "0.5";
+        var baseUrl = SeoHelper.BuildAbsoluteUrl(Request, Request.PathBase.Add("/").ToString().TrimEnd('/'));
+        return Content($"User-agent: *\nAllow: /\nDisallow: /Admin/\nSitemap: {baseUrl}/sitemap.xml\n", "text/plain", Encoding.UTF8);
     }
+
+    private sealed record SitemapUrl(string Location, DateTime? LastModified, string ChangeFrequency, string Priority);
 }
