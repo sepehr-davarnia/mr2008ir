@@ -4,6 +4,7 @@ using Atelier.Web.Services;
 using Atelier.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Atelier.Web.Controllers;
 
@@ -59,6 +60,7 @@ public class PagesController : PublicControllerBase
 
     [HttpPost("contact-us")]
     [ValidateAntiForgeryToken]
+    [EnableRateLimiting("contact")]
     public async Task<IActionResult> SubmitContact(ContactFormInputModel input)
     {
         var page = await GetPageSnapshotAsync("contact-us");
