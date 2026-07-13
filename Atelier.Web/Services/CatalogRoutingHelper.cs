@@ -8,46 +8,16 @@ public static class CatalogRoutingHelper
 {
     private static readonly Dictionary<string, IReadOnlyList<string>> CategoryProductMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["thermowood"] =
+        ["engine-parts"] =
         [
-            "thermowood-simple-19mm-42mm",
-            "thermowood-simple-16mm",
-            "thermowood-simple-14mm",
-            "thermowood-simple-8mm",
-            "thermowood-parvaneh-14mm"
+            "peugeot-2008-genuine-oil-filter",
+            "peugeot-2008-508-spark-plug-set"
         ],
-        ["thermowood-tiles"] =
-        [
-            "thermowood-tile-standard",
-            "thermowood-tile-puzzle"
-        ],
-        ["artificial-grass-tiles"] = ["artificial-grass-tile"],
-        ["thermowall"] = ["thermowall-panel"],
-        ["russian-wood"] =
-        [
-            "russian-wood-10x5-3m",
-            "russian-wood-10x2-3m",
-            "russian-wood-10x15-3m",
-            "russian-wood-10x1-3m",
-            "russian-wood-15x15-3m",
-            "russian-wood-15x2-3m",
-            "russian-wood-5x3-3m",
-            "russian-wood-20x2-3m",
-            "russian-wood-15x1-3m",
-            "russian-wood-15x5-3m",
-            "russian-wood-20x5-3m",
-            "russian-bench-10x08-3m",
-            "russian-bench-10x07-3m",
-            "russian-angle-5cm",
-            "russian-angle-3cm",
-            "russian-wood-strip",
-            "subwood-3x2",
-            "subwood-4x2",
-            "subwood-5x3",
-            "subwood-4x6",
-            "subwood-5x5"
-        ],
-        ["lambe"] = ["lambe-wood"]
+        ["brake-suspension"] = ["peugeot-2008-textar-front-brake-pad"],
+        ["filters-consumables"] = ["peugeot-2008-genuine-oil-filter", "peugeot-2008-active-carbon-cabin-filter"],
+        ["electrical-parts"] = ["peugeot-2008-508-spark-plug-set"],
+        ["body-lighting"] = [],
+        ["interior-accessories"] = []
     };
 
     public static bool TryGetPrimaryCategorySlug(string productSlug, out string categorySlug)
@@ -195,4 +165,5 @@ public sealed class CatalogCategoryNode
     public string Slug { get; init; } = string.Empty;
     public int? ParentId { get; init; }
     public int? MediaId { get; init; }
+    public DateTime? UpdatedAt { get; init; }
 }
