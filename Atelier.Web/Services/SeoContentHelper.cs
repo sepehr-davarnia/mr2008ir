@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using Atelier.Web.ViewModels;
 
 namespace Atelier.Web.Services;
@@ -14,7 +16,7 @@ public static class SeoContentHelper
             return null;
         }
 
-        var normalized = content.Replace("\n", " ").Replace("\r", " ").Trim();
+        var normalized = NormalizePlainText(content);
         return normalized.Length <= 160 ? normalized : normalized[..160];
     }
 
@@ -25,7 +27,7 @@ public static class SeoContentHelper
             return null;
         }
 
-        var normalized = content.Replace("\n", " ").Replace("\r", " ").Trim();
+        var normalized = NormalizePlainText(content);
         return normalized.Length <= 120 ? normalized : normalized[..120];
     }
 
@@ -94,5 +96,12 @@ public static class SeoContentHelper
         }
 
         return results;
+    }
+
+    private static string NormalizePlainText(string content)
+    {
+        var withoutMarkup = Regex.Replace(content, "<[^>]+>", " ");
+        var decoded = WebUtility.HtmlDecode(withoutMarkup);
+        return Regex.Replace(decoded, @"\s+", " ").Trim();
     }
 }
