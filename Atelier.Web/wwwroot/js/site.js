@@ -14,6 +14,12 @@
     const open = nav?.classList.toggle('is-open');
     toggle.setAttribute('aria-expanded', String(Boolean(open)));
   });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !nav?.classList.contains('is-open')) return;
+    nav.classList.remove('is-open');
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.focus();
+  });
 
   if (reduced) return document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
   const observer = new IntersectionObserver(entries => entries.forEach(entry => {
