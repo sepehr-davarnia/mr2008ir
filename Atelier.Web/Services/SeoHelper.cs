@@ -57,8 +57,8 @@ public static class SeoHelper
             potentialAction = new
             {
                 @type = "SearchAction",
-                target = $"{data.Url}/search?query={{query}}",
-                queryInput = "required name=query"
+                target = $"{data.Url}/categories?q={{search_term_string}}",
+                queryInput = "required name=search_term_string"
             }
         }, JsonOptions);
     }
