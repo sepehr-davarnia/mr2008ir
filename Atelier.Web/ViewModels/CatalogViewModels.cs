@@ -23,6 +23,8 @@ public class CategoryViewModel
 {
     public IReadOnlyList<BreadcrumbItemViewModel> Breadcrumbs { get; set; } = new List<BreadcrumbItemViewModel>();
     public IReadOnlyList<CategoryTreeItemViewModel> Categories { get; set; } = new List<CategoryTreeItemViewModel>();
+    public string? Query { get; set; }
+    public IReadOnlyList<ProductCardViewModel> SearchResults { get; set; } = new List<ProductCardViewModel>();
     public string MetaTitle { get; set; } = string.Empty;
     public string MetaDescription { get; set; } = string.Empty;
     public string CanonicalUrl { get; set; } = string.Empty;
